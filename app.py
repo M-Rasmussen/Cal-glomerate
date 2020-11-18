@@ -89,6 +89,7 @@ def emit_events_to_calender(channel, cal_code):
             "start": record.start,
             "end": record.end,
             "title": record.title,
+            "eventid": record.id,
         }
         for record in db.session.query(models.Event)
         .filter(models.Event.ccode.contains([cal_code]))
@@ -190,7 +191,7 @@ def on_new_event(data):
     addedEventId = add_event([ccode], title, start, end, "some words")
     print("SENDING INDIVIDUAL EVENT")
     socketio.emit(
-        "calender_event", {"title": title, "start": start, "end": end}, room=get_sid()
+        "calender_event", {"title": title, "start": start, "end": end, "eventid": addedEventId}, room=get_sid()
     )
     return addedEventId
 
