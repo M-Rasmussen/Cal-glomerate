@@ -20,10 +20,14 @@ export function Cal_comp(props) {
           let intend = parseInt(event['end']);
           let end = new Date(intend * 1000);
           let title = event['title'];
+          let event_id=event['eventid'];
+          console.log(event_id)
+
           return {
             start,
             end,
-            title
+            title,
+            event_id
           };
         })
       );
@@ -42,8 +46,10 @@ export function Cal_comp(props) {
         let end = new Date(intend * 1000);
         console.log(end);
         let title = data['title'];
+        let event_id=event['eventid'];
+        console.log(event_id)
         console.log('ADDING NEW INDIVIDUAL EVENT');
-        setEvents((prevEvents) => [...prevEvents, { start, end, title }]);
+        setEvents((prevEvents) => [...prevEvents, { start, end, title, event_id }]);
       });
     }, []);
   }
@@ -61,7 +67,7 @@ export function Cal_comp(props) {
         max={dates.add(dates.endOf(new Date(2015, 17, 1), 'day'), -1, 'hours')}
         scrollToTime={new Date(1970, 1, 1, 6)}
         defaultDate={new Date(2020, 10, 1)}
-        //   onSelectEvent={event => alert(event.title)}
+        //onSelectEvent={event => alert(event.title)}
         //   onSelectSlot={handleSelect}
       />
     </div>
