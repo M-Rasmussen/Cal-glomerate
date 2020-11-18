@@ -44,6 +44,7 @@ export default function Login() {
       <h1 className="header">Calglomerate</h1>
       <div className="container">
           <HomePage ccode={ccode} />
+          
       </div>
     </div>
     );

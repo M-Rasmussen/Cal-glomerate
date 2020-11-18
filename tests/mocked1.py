@@ -115,81 +115,81 @@ class SQLQueryTestCase(unittest.TestCase):
                         response = app.emit_events_to_calender(test_case[KEY_INPUT],test_case[KEY_INPUT2])
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
-# class GoogleLoginTestCase(unittest.TestCase):
-#     '''
-#     Sets up test cases Google Oauth.
-#     '''
-#     def setUp(self):
-#         '''
-#         Sets up parameters for dad cases.
-#         '''
-#         self.success_test_params = [
-#             {
-#                 KEY_INPUT: {"name": "Koomi", "email":\
-#                 "baconatoring@gmail.com", "idtoken": "good_mock_token"},
-#                 KEY_EXPECTED: "mock_id"
-#             }
-#         ]
-#         self.failure_test_params = [
-#             {
-#                 KEY_INPUT: {"name": "Koomi", "email":\
-#                 "baconatoring@gmail.com", "idtoken": "bad_mock_token"},
-#                 KEY_EXPECTED: "Unverified."
-#             },
-#             {
-#                 KEY_INPUT: {"name": "Koomi", "email":\
-#                 "baconatoring@gmail.com", "idtoken": "vvmock_token"},
-#                 KEY_EXPECTED: "Unverified."
-#             }
-#         ]
-#     def mocked_verify(self, *args, **kwargs):
-#         '''
-#         Creates a mocked Google verification.
-#         '''
-#         if args[0]=="good_mock_token":
-#             return {"sub": "mock_id"}
-#         if args[0]=="bad_mock_token":
-#             return {"false": False}
-#         raise ValueError
-#     def mocked_flask(self):
-#         '''
-#         Mocks out flask sid request.
-#         '''
-#         class MockedFlaskServer:
-#             '''
-#             Mocks a flask server with a fake sid.
-#             '''
-#             def __init__(self, sig_id):
-#                 self.sig_id=sig_id
-#             def sid(self):
-#                 '''
-#                 Returns sid of fake server.
-#                 '''
-#                 return self.sig_id
+class GoogleLoginTestCase(unittest.TestCase):
+    '''
+    Sets up test cases Google Oauth.
+    '''
+    def setUp(self):
+        '''
+        Sets up parameters for dad cases.
+        '''
+        self.success_test_params = [
+            {
+                KEY_INPUT: {"name": "Koomi", "email":\
+                "baconatoring@gmail.com", "idtoken": "good_mock_token"},
+                KEY_EXPECTED: "mock_id"
+            }
+        ]
+        self.failure_test_params = [
+            {
+                KEY_INPUT: {"name": "Koomi", "email":\
+                "baconatoring@gmail.com", "idtoken": "bad_mock_token"},
+                KEY_EXPECTED: "Unverified."
+            },
+            {
+                KEY_INPUT: {"name": "Koomi", "email":\
+                "baconatoring@gmail.com", "idtoken": "vvmock_token"},
+                KEY_EXPECTED: "Unverified."
+            }
+        ]
+    def mocked_verify(self, *args, **kwargs):
+        '''
+        Creates a mocked Google verification.
+        '''
+        if args[0]=="good_mock_token":
+            return {"sub": "mock_id"}
+        if args[0]=="bad_mock_token":
+            return {"false": False}
+        raise ValueError
+    def mocked_flask(self):
+        '''
+        Mocks out flask sid request.
+        '''
+        class MockedFlaskServer:
+            '''
+            Mocks a flask server with a fake sid.
+            '''
+            def __init__(self, sig_id):
+                self.sig_id=sig_id
+            def sid(self):
+                '''
+                Returns sid of fake server.
+                '''
+                return self.sig_id
 
-#         return MockedFlaskServer("1234").sid()
-#     def test_on_new_google_user_success(self):
-#         '''
-#         Success cases for on_new_google_user.
-#         '''
-#         for test_case in self.success_test_params:
-#             with mock.patch('google.oauth2.id_token.verify_oauth2_token', self.mocked_verify):
-#                 with mock.patch('app.get_sid', self.mocked_flask):
-#                     with mock.patch('app.db', AlchemyMagicMock()):
-#                         response = app.on_new_google_user(test_case[KEY_INPUT])
-#             expected = test_case[KEY_EXPECTED]
-#             self.assertEqual(response, expected)
-#     def test_on_new_google_user_failure(self):
-#         '''
-#         Failure cases for on_new_google_user.
-#         '''
-#         for test_case in self.failure_test_params:
-#             with mock.patch('google.oauth2.id_token.verify_oauth2_token', self.mocked_verify):
-#                 with mock.patch('app.get_sid', self.mocked_flask):
-#                     with mock.patch('app.db', AlchemyMagicMock()):
-#                         response = app.on_new_google_user(test_case[KEY_INPUT])
-#             expected = test_case[KEY_EXPECTED]
-#             self.assertEqual(response, expected)
+        return MockedFlaskServer("1234").sid()
+    def test_on_new_google_user_success(self):
+        '''
+        Success cases for on_new_google_user.
+        '''
+        for test_case in self.success_test_params:
+            with mock.patch('on_new_google_user', self.mocked_verify):
+                with mock.patch('app.get_sid', self.mocked_flask):
+                    with mock.patch('app.db', AlchemyMagicMock()):
+                        response = app.on_new_google_user(test_case[KEY_INPUT])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
+    def test_on_new_google_user_failure(self):
+        '''
+        Failure cases for on_new_google_user.
+        '''
+        for test_case in self.failure_test_params:
+            with mock.patch('google.oauth2.id_token.verify_oauth2_token', self.mocked_verify):
+                with mock.patch('app.get_sid', self.mocked_flask):
+                    with mock.patch('app.db', AlchemyMagicMock()):
+                        response = app.on_new_google_user(test_case[KEY_INPUT])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
 
 
 if __name__ == '__main__':
