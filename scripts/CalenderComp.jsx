@@ -23,11 +23,11 @@ export function Cal_comp(props) {
   const [events, setEvents] = React.useState([]);
   const localizer = momentLocalizer(moment);
   const [modal, setModal] = React.useState(false);
-  const [modstartTime, modsetStartTime] = React.useState('10:00');
-  const [modendTime, modsetEndTime] = React.useState('11:00');
+  const [modstartTime, modsetStartTime] = React.useState(new Date());
+  const [modendTime, modsetEndTime] = React.useState(new Date());
   const [modtitle, modsetTitle] = React.useState('Title');
   const [modselectedDate, modsetSelectedDate] = useState(new Date());
-  
+  const [modEventId, modSetEventId] = useState(0);
   
   React.useEffect(() => {
     console.log(events);
@@ -80,6 +80,7 @@ export function Cal_comp(props) {
     console.log(modselectedDate);
     console.log(modstartTime);
     console.log(modendTime);
+    console.log(modEventId);
     const start = moment(
       modselectedDate.toISOString().split('T')[0] + ' ' + modstartTime
     ).format('X');
@@ -87,14 +88,13 @@ export function Cal_comp(props) {
     const end = moment(
       modselectedDate.toISOString().split('T')[0] + ' ' + modendTime
     ).format('X');
-    console.log(start);
     Socket.emit('modify event', {
       title: modtitle,
       date: modselectedDate,
       start,
       end,
       ccode: props.ccode[0],
-      event_id: eventID
+      event_id: modEventId
     });
     setModal(false);
   };
@@ -116,7 +116,13 @@ export function Cal_comp(props) {
         max={dates.add(dates.endOf(new Date(2015, 17, 1), 'day'), -1, 'hours')}
         scrollToTime={new Date(1970, 1, 1, 6)}
         defaultDate={new Date(2020, 10, 1)}
-          onSelectEvent={ event =>{setModal(true); modsetTitle(event.title); modsetStartTime(event.start); modsetEndTime(event.end);}
+          onSelectEvent={ event =>{
+          setModal(true); 
+          modsetTitle(event.title); 
+          modsetSelectedDate(event.start);
+          modsetStartTime(event.start); 
+          modsetEndTime(event.end);
+          modSetEventId(event.event_id);}
            } 
         />
 
@@ -136,8 +142,6 @@ export function Cal_comp(props) {
       >        <form onSubmit={handleSubmit}>
           <Stack tokens={{ childrenGap: 10, padding: 20 }}>
           <h1>{modtitle}</h1>
-
-            <h3> Title </h3>
             <TextField
               label="title"
               value={modtitle}
