@@ -4,6 +4,7 @@ import * as dates from './dates';
 import moment from 'moment';
 import './CalenderStyle.css';
 import { Socket } from './Socket';
+import randomColor from 'randomcolor';
 
 export function Cal_comp(props) {
   const [events, setEvents] = React.useState([]);
@@ -13,6 +14,7 @@ export function Cal_comp(props) {
     console.log(events);
     Socket.emit('get events', props.ccode[0]);
     Socket.on('recieve all events', (data) => {
+      console.log(data);
       setEvents(
         data.map((event) => {
           let intstart = parseInt(event['start']);
@@ -20,14 +22,16 @@ export function Cal_comp(props) {
           let intend = parseInt(event['end']);
           let end = new Date(intend * 1000);
           let title = event['title'];
-          let event_id=event['eventid'];
-          console.log(event_id)
+          let event_id = event['eventid'];
+          console.log(event_id);
 
+          const ccode = event['ccode'];
           return {
             start,
             end,
             title,
-            event_id
+            event_id,
+            ccode
           };
         })
       );
@@ -46,10 +50,13 @@ export function Cal_comp(props) {
         let end = new Date(intend * 1000);
         console.log(end);
         let title = data['title'];
-        let event_id=event['eventid'];
-        console.log(event_id)
+        let event_id = event['eventid'];
+        console.log(event_id);
         console.log('ADDING NEW INDIVIDUAL EVENT');
-        setEvents((prevEvents) => [...prevEvents, { start, end, title, event_id }]);
+        setEvents((prevEvents) => [
+          ...prevEvents,
+          { start, end, title, event_id }
+        ]);
       });
     }, []);
   }
@@ -69,6 +76,19 @@ export function Cal_comp(props) {
         defaultDate={new Date(2020, 10, 1)}
         //onSelectEvent={event => alert(event.title)}
         //   onSelectSlot={handleSelect}
+        eventPropGetter={(event, start, end, isSelected) => {
+          console.log(event, start, end, isSelected);
+          const backgroundColor = randomColor({ seed: event.ccode[0] * 1000 });
+          const style = {
+            backgroundColor: backgroundColor,
+            // borderRadius: '0px',
+            opacity: 0.8,
+            color: 'black',
+            border: '0px',
+            display: 'block'
+          };
+          return { style };
+        }}
       />
     </div>
   );
