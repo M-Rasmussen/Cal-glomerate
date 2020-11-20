@@ -59,8 +59,21 @@ def add_event(ccode, title, start, end, desc):
     db.session.add(addedEvent)
     db.session.commit()
     return addedEvent.id
+def mod_event(ccode, title, start, end, desc,event_id):
+    """
+    modifies an event, returns id of added event
+    """
+    event = db.session.query(models.Event).filter(models.Event.id==event_id).first()
+    event.id = event_id
+    event.title= title
+    event.ccode = ccode
+    event.start = start
+    event.end = end
+    event.desc = desc
+    db.session.commit()
+    emit_events_to_calender("recieve all events", ccode)
 
-
+  
 def add_calendar_for_user(userid):
     """
     adds an event, returns the ccode of the new calendar
@@ -195,7 +208,25 @@ def on_new_event(data):
     )
     return addedEventId
 
+@socketio.on("modify event")
+def on_modify_event(data):
+    """
+    add a new event for to calendar
+    """
+    print(data)
+    title = data["title"]
+    date = data["date"]
+    start = data["start"]
+    end = data["end"]
+    ccode = data["ccode"]
+    event_id = data["event_id"]
+    print(start)
+    print(end)
+    mod_event([ccode], title, start, end,"some words", event_id)
 
+
+    
+    
 @socketio.on("cCodeToMerge")
 def on_merge_calendar(data):
     merge_code = int(data["userToMergeWith"])
