@@ -197,7 +197,7 @@ def on_new_event(data):
     print("SENDING INDIVIDUAL EVENT")
     socketio.emit(
         "calender_event",
-        {"title": title, "start": start, "end": end, "eventid": addedEventId},
+        {"title": title, "start": start, "end": end, "eventid": addedEventId, "ccode": [ccode]},
         room=get_sid(),
     )
     return addedEventId
