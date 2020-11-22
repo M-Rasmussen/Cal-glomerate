@@ -66,7 +66,7 @@ export function Cal_comp(props) {
         let end = new Date(intend * 1000);
         console.log(end);
         let title = data['title'];
-        let event_id = event['eventid'];
+        let event_id = data['eventid'];
         console.log(event_id);
         console.log('ADDING NEW INDIVIDUAL EVENT');
         setEvents((prevEvents) => [
