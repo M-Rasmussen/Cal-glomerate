@@ -202,6 +202,32 @@ def on_new_event(data):
     )
     return addedEventId
 
+@socketio.on("modify event")
+def on_modify_event(data):
+    """
+    modify an event for to calendar
+    """
+    print(data)
+    title = data["title"]
+    start = data["start"]
+    end = data["end"]
+    # ccode = data["ccode"]
+    eventid = data["event_id"]
+    exists = (
+        db.session.query(models.Event.id).filter_by(id=eventid).scalar()
+        is not None
+    )
+    try:
+        if not exists:
+            raise ValueError
+        record=db.session.query(models.Event).filter_by(id=eventid).first()
+        print(record)
+        setattr(record, 'title', title)
+        setattr(record, 'start', start)
+        setattr(record, 'end', end)
+        db.session.commit()
+    except ValueError:
+        print("Cannot modify a nonexistent event.")
 
 @socketio.on("cCodeToMerge")
 def on_merge_calendar(data):
