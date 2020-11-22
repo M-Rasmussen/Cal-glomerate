@@ -27,7 +27,6 @@ export function Cal_comp(props) {
   const [modselectedDate, modsetSelectedDate] = useState(new Date());
   const [modEventId, modSetEventId] = useState(0);
   React.useEffect(() => {
-    console.log(events);
     Socket.emit('get events', props.ccode[0]);
     Socket.on('recieve all events', (data) => {
       console.log(data);
@@ -53,6 +52,7 @@ export function Cal_comp(props) {
       );
     });
   }, []);
+  
   function new_Event() {
     React.useEffect(() => {
       Socket.on('calender_event', (data) => {
@@ -66,12 +66,13 @@ export function Cal_comp(props) {
         let end = new Date(intend * 1000);
         console.log(end);
         let title = data['title'];
-        let event_id = event['eventid'];
+        let event_id = data['eventid'];
+        let ccode = data['ccode'];
         console.log(event_id);
         console.log('ADDING NEW INDIVIDUAL EVENT');
         setEvents((prevEvents) => [
           ...prevEvents,
-          { start, end, title, event_id }
+          { start, end, title, event_id, ccode }
         ]);
       });
     }, []);
@@ -126,7 +127,6 @@ export function Cal_comp(props) {
           modSetEventId(event.event_id);}
            } 
         eventPropGetter={(event, start, end, isSelected) => {
-          console.log(event, start, end, isSelected);
           const backgroundColor = randomColor({ seed: event.ccode[0] * 1000 });
           const style = {
             backgroundColor: backgroundColor,
