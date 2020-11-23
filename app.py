@@ -243,9 +243,10 @@ def on_merge_calendar(data):
     merge_code = int(data["userToMergeWith"])
     print("LOOKING FOR CALCODE", data["userToMergeWith"])
     cal_code = int(data["currentUser"])
+    checkExists = db.session.query(models.Calendars).filter_by(ccode=merge_code).first()
+    print(checkExists)
     exists = (
-        db.session.query(models.Calendars.ccode).filter_by(ccode=merge_code).scalar()
-        is not None
+        checkExists is not None and not checkExists.private
     )
     try:
         if not exists:
@@ -260,7 +261,7 @@ def on_merge_calendar(data):
                 db.session.commit()
             emit_events_to_calender("recieve all events", cal_code)
     except ValueError:
-        print("CCODE DOES NOT EXIST!")
+        print("Ccode does not exist, or you have attempted to merge with a private calendar.")
 
 
 @app.route("/")
