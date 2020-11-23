@@ -51,9 +51,11 @@ class Calendars(db.Model):
 
     ccode = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.String(120))
+    private = db.Column(db.Boolean, default=False)
 
-    def __init__(self, userid):
+    def __init__(self, userid, privFlag):
         self.userid = userid
+        self.private = privFlag
 
     def __repr__(self):
         return "< userid: {}\nccode: {}".format(self.userid, self.ccode)

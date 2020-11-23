@@ -73,12 +73,13 @@ def mod_event(ccode, title, start, end, desc,event_id):
     db.session.commit()
     emit_events_to_calender("recieve all events", ccode)
 
-  
-def add_calendar_for_user(userid):
+
+def add_calendar_for_user(userid, privFlag):
+
     """
     adds an event, returns the ccode of the new calendar
     """
-    addedCalendar = models.Calendars(userid)
+    addedCalendar = models.Calendars(userid, privFlag)
     db.session.add(addedCalendar)
     db.session.commit()
     return addedCalendar.ccode
@@ -97,17 +98,22 @@ def emit_events_to_calender(channel, cal_code):
     Emits all calendar events along channel
     """
     sid = get_sid()
-    all_events = [
-        {
-            "start": record.start,
-            "end": record.end,
-            "title": record.title,
-            "eventid": record.id,
-        }
-        for record in db.session.query(models.Event)
-        .filter(models.Event.ccode.contains([cal_code]))
-        .all()
-    ]
+    all_events = []
+    for ccode in [1, 2]:
+        eventsForCcode = [
+            {
+                "start": record.start,
+                "end": record.end,
+                "title": record.title,
+                "ccode": record.ccode,
+                "eventid": record.id,
+            }
+            for record in db.session.query(models.Event)
+            .filter(models.Event.ccode.contains([ccode]))
+            .all()
+        ]
+        all_events.extend(eventsForCcode)
+
     for event in all_events:
         print(event)
     socketio.emit(channel, all_events, room=sid)
@@ -151,7 +157,7 @@ def on_new_google_user(data):
         )
         if not exists:
             push_new_user_to_db(userid, data["name"], data["email"])
-            add_calendar_for_user(userid)
+            add_calendar_for_user(userid, False)
         all_ccodes = [
             record.ccode
             for record in db.session.query(models.Calendars)
@@ -159,7 +165,7 @@ def on_new_google_user(data):
             .all()
         ]
         socketio.emit(
-            "Verified", {"name": data["name"], "ccodes": all_ccodes}, room=sid
+            "Verified", {"name": data["name"], "ccodes": all_ccodes, "userid": userid}, room=sid
         )
         return userid
     except ValueError:
@@ -174,11 +180,14 @@ def on_new_google_user(data):
 @socketio.on("add calendar")
 def on_add_calendar(data):
     """
-    add a new calednar for user
+    add a new calendar for user
     """
+    print(data)
     userid = data["userid"]
-    ccode = add_calendar_for_user(userid)
-    print(ccode)
+    private = data["privateCal"]
+    print(private)
+    ccode = add_calendar_for_user(userid, private)
+    print("Added calendar for user ", userid, "With ccode ", ccode, " Private flag: ", private)
 
 
 @socketio.on("get events")
@@ -204,7 +213,9 @@ def on_new_event(data):
     addedEventId = add_event([ccode], title, start, end, "some words")
     print("SENDING INDIVIDUAL EVENT")
     socketio.emit(
-        "calender_event", {"title": title, "start": start, "end": end, "eventid": addedEventId}, room=get_sid()
+        "calender_event",
+        {"title": title, "start": start, "end": end, "eventid": addedEventId, "ccode": [ccode]},
+        room=get_sid(),
     )
     return addedEventId
 
@@ -256,9 +267,11 @@ def on_merge_calendar(data):
 def hello():
     """
     Runs at page-load.
+    
     """
     models.db.create_all()
     db.session.commit()
+    print("User has joined.")
     return flask.render_template("index.html")
 
 

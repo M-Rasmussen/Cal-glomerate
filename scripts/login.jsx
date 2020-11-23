@@ -10,6 +10,7 @@ export default function Login() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [ccode, setCcode] = useState([-1]);
+  const [userId, setUserId] = useState('');
 
   function loginUser(response) {
     const name = response.getBasicProfile().getName();
@@ -32,6 +33,7 @@ export default function Login() {
         setLoggedIn(true);
         setUsername(data.name);
         setCcode(data.ccodes);
+        setUserId(data.userid);
       });
     }, []);
   }
@@ -43,7 +45,7 @@ export default function Login() {
       <div className="outermost">
         <h1 className="header">Calglomerate</h1>
         <div className="container">
-          <HomePage ccode={ccode} />
+          <HomePage ccode={ccode} userId={userId} />
         </div>
       </div>
     );
