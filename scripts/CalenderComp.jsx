@@ -74,7 +74,7 @@ export function Cal_comp(props) {
       });
     }, []);
   }
-    const handleSubmit = (event) => {
+    const handleSubmit = (event) => {{
     event.preventDefault();
     console.log(modtitle);
     console.log(modselectedDate);
@@ -97,7 +97,7 @@ export function Cal_comp(props) {
       event_id: modEventId
     });
     setModal(false);
-  };
+  }};
 
   new_Event();
 
