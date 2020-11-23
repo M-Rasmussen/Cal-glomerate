@@ -12,18 +12,22 @@ import { Card } from '@uifabric/react-cards';
 export function Create_cal(props) {
   const [modal, setModal] = useState(false);
   const [title, setTitle] = useState('Title');
+  const [priv, setPriv] = useState(false);
   const currUser = props.userId;
   
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log(title);
+    console.log(priv);
     console.log("Current user:" + currUser);
     Socket.emit('add calendar', {
       title: title,
-      userid: currUser
+      userid: currUser,
+      privateCal: priv
     });
     console.log("Emitted!");
     setModal(false);
+    setPriv(false);
   };
 
   return (
@@ -63,6 +67,8 @@ export function Create_cal(props) {
                 setTitle(val.target.value);
               }}
             />
+            <label for="private"> Make Calendar Private</label>
+            <input type="checkbox" id="private" onChange={() => {setPriv(!priv)}} defaultChecked={priv}/>
             <DefaultButton onClick={handleSubmit}>Send</DefaultButton>
           </Stack>
         </form>
