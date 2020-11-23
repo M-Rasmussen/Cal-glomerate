@@ -151,7 +151,7 @@ def on_new_google_user(data):
             .all()
         ]
         socketio.emit(
-            "Verified", {"name": data["name"], "ccodes": all_ccodes}, room=sid
+            "Verified", {"name": data["name"], "ccodes": all_ccodes, "userid": userid}, room=sid
         )
         return userid
     except ValueError:
@@ -166,11 +166,12 @@ def on_new_google_user(data):
 @socketio.on("add calendar")
 def on_add_calendar(data):
     """
-    add a new calednar for user
+    add a new calendar for user
     """
+    print(data)
     userid = data["userid"]
     ccode = add_calendar_for_user(userid)
-    print(ccode)
+    print("Added calendar for user ", userid, "With ccode ", ccode)
 
 
 @socketio.on("get events")
