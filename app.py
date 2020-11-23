@@ -170,6 +170,8 @@ def on_add_calendar(data):
     """
     print(data)
     userid = data["userid"]
+    private = data["privateCal"]
+    print(private)
     ccode = add_calendar_for_user(userid)
     print("Added calendar for user ", userid, "With ccode ", ccode)
 
