@@ -84,16 +84,22 @@ def emit_events_to_calender(channel, cal_code):
     Emits all calendar events along channel
     """
     sid = get_sid()
-    all_events = [
-        {
-            "start": record.start,
-            "end": record.end,
-            "title": record.title,
-        }
-        for record in db.session.query(models.Event)
-        .filter(models.Event.ccode.contains([cal_code]))
-        .all()
-    ]
+    all_events = []
+    for ccode in [1, 2]:
+        eventsForCcode = [
+            {
+                "start": record.start,
+                "end": record.end,
+                "title": record.title,
+                "ccode": record.ccode,
+                "eventid": record.id,
+            }
+            for record in db.session.query(models.Event)
+            .filter(models.Event.ccode.contains([ccode]))
+            .all()
+        ]
+        all_events.extend(eventsForCcode)
+
     for event in all_events:
         print(event)
     socketio.emit(channel, all_events, room=sid)
@@ -191,7 +197,9 @@ def on_new_event(data):
     addedEventId = add_event([ccode], title, start, end, "some words")
     print("SENDING INDIVIDUAL EVENT")
     socketio.emit(
-        "calender_event", {"title": title, "start": start, "end": end}, room=get_sid()
+        "calender_event",
+        {"title": title, "start": start, "end": end, "eventid": addedEventId, "ccode": [ccode]},
+        room=get_sid(),
     )
     return addedEventId
 

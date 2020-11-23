@@ -44,6 +44,7 @@
     "moment": "^2.29.1",
     "office-ui-fabric-react": "^7.150.0",
     "prop-types": "^15.7.2",
+    "randomcolor": "^0.6.2",
     "rc-time-picker": "^3.7.3",
     "react-big-calendar": "^0.28.6",
     "react-calendar": "^3.2.0",
