@@ -179,7 +179,6 @@ def send_events_to_calendar(data):
     emit_events_to_calender("recieve all events", data)
     print("SENT EVENTS!")
 
-
 @socketio.on("new event")
 def on_new_event(data):
     """
@@ -187,7 +186,6 @@ def on_new_event(data):
     """
     print(data)
     title = data["title"]
-    date = data["date"]
     start = data["start"]
     end = data["end"]
     ccode = data["ccode"]
@@ -226,6 +224,12 @@ def on_modify_event(data):
         setattr(record, 'start', start)
         setattr(record, 'end', end)
         db.session.commit()
+        modRecord=db.session.query(models.Event).filter_by(id=eventid).first()
+        socketio.emit(
+        "new modified event",
+        {"title": modRecord.title, "start": modRecord.start, "end": modRecord.end, "eventid": modRecord.id, "ccode": modRecord.ccode},
+        room=get_sid(),
+        )
     except ValueError:
         print("Cannot modify a nonexistent event.")
 
