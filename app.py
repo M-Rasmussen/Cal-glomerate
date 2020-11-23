@@ -61,11 +61,11 @@ def add_event(ccode, title, start, end, desc):
     return addedEvent.id
 
 
-def add_calendar_for_user(userid):
+def add_calendar_for_user(userid, privFlag):
     """
     adds an event, returns the ccode of the new calendar
     """
-    addedCalendar = models.Calendars(userid)
+    addedCalendar = models.Calendars(userid, privFlag)
     db.session.add(addedCalendar)
     db.session.commit()
     return addedCalendar.ccode
@@ -143,7 +143,7 @@ def on_new_google_user(data):
         )
         if not exists:
             push_new_user_to_db(userid, data["name"], data["email"])
-            add_calendar_for_user(userid)
+            add_calendar_for_user(userid, False)
         all_ccodes = [
             record.ccode
             for record in db.session.query(models.Calendars)
@@ -172,8 +172,8 @@ def on_add_calendar(data):
     userid = data["userid"]
     private = data["privateCal"]
     print(private)
-    ccode = add_calendar_for_user(userid)
-    print("Added calendar for user ", userid, "With ccode ", ccode)
+    ccode = add_calendar_for_user(userid, private)
+    print("Added calendar for user ", userid, "With ccode ", ccode, " Private flag: ", private)
 
 
 @socketio.on("get events")
@@ -238,6 +238,7 @@ def hello():
     """
     models.db.create_all()
     db.session.commit()
+    print("User has joined.")
     return flask.render_template("index.html")
 
 
