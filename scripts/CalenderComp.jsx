@@ -20,8 +20,8 @@ import {
 export function Cal_comp({ ccode, eventsToShow }) {
   const localizer = momentLocalizer(moment);
   const [modal, setModal] = React.useState(false);
-  const [modstartTime, modsetStartTime] = React.useState(new Date());
-  const [modendTime, modsetEndTime] = React.useState(new Date());
+  const [modstartTime, modsetStartTime] = React.useState("11:00");
+  const [modendTime, modsetEndTime] = React.useState("12:00");
   const [modtitle, modsetTitle] = React.useState('Title');
   const [modselectedDate, modsetSelectedDate] = useState(new Date());
   const [modEventId, modSetEventId] = useState(0);
@@ -65,7 +65,8 @@ export function Cal_comp({ ccode, eventsToShow }) {
         onSelectEvent={(event) => {
           setModal(true);
           modsetTitle(event.title);
-          modsetSelectedDate(event.start);
+          //logic go add event here. have to format it to show the date, along with the time "11:00"
+          modsetSelectedDate(moment(event.start).format('L'));
           modsetStartTime(event.start);
           modsetEndTime(event.end);
           modSetEventId(event.event_id);
