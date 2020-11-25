@@ -7,9 +7,9 @@ import { Cal_comp } from './CalenderComp.jsx';
 import { HomePage } from './LogedInHome';
 
 export default function Login() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(true);
   const [username, setUsername] = useState('');
-  const [ccode, setCcode] = useState([-1]);
+  const [ccode, setCcode] = useState([1, 2]);
   const [userId, setUserId] = useState('');
 
   function loginUser(response) {
