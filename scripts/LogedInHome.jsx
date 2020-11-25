@@ -12,7 +12,7 @@ import { CalendarSelector } from './CalendarSelector';
 export function HomePage({ ccode, userId }) {
   const [events, setEvents] = React.useState([]);
   const [eventsToShow, setEventsToShow] = React.useState([]);
-
+  console.log(events);
   React.useEffect(() => {
     Socket.emit('get events', ccode[0]);
     Socket.on('recieve all events', (data) => {
@@ -67,7 +67,6 @@ export function HomePage({ ccode, userId }) {
     }, []);
   }
   new_Event();
-
   return (
     <div className="conent_wrapper">
       <div className="interact_side">
@@ -84,7 +83,7 @@ export function HomePage({ ccode, userId }) {
       </div>
       <div className="calender_side">
         <Card style={{ maxWidth: 'none', padding: '5px', background: 'white' }}>
-          <Cal_comp ccode={ccode} events={eventsToShow} />
+          <Cal_comp ccode={ccode} eventsToShow={eventsToShow} />
         </Card>
       </div>
     </div>
