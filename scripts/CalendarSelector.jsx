@@ -5,27 +5,20 @@ import {
   Stack,
   TextField
 } from 'office-ui-fabric-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-export function CalendarSelector({ events, eventsToShow, setEventsToShow }) {
+export function CalendarSelector({ events, setEventsToShow }) {
   const ccodes = [...new Set(events.map((event) => event.ccode[0]))];
 
-  const [showCcode, setShowCcode] = useState(
-    ccodes.map((ccode) => {
-      return { ccode, show: true };
-    })
-    // ccodes.reduce((acc, ccode) => {
-    //   console.log(acc);
-    //   acc[ccode] = true;
-    // }, {})
-  );
-
-  console.log(showCcode);
-  console.log(
-    ccodes.map((ccode) => {
-      return { ccode, show: true };
-    })
-  );
+  const [showCcode, setShowCcode] = useState({});
+  useEffect(() => {
+    const initialshowCcode = Object.fromEntries(
+      ccodes.map((ccode) => [ccode, true])
+    );
+    console.log(initialshowCcode);
+    setShowCcode(initialshowCcode);
+    setEventsToShow(events.filter((event) => initialshowCcode[event.ccode[0]]));
+  }, [events]);
 
   const toggleCcode = (ccode) => {
     const newShowCcode = showCcode;

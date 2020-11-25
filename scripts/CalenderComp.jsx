@@ -16,9 +16,8 @@ import {
   Stack,
   TextField
 } from 'office-ui-fabric-react';
-import { Card } from '@uifabric/react-cards';
 
-export function Cal_comp({ ccode, events }) {
+export function Cal_comp({ ccode, eventsToShow }) {
   const localizer = momentLocalizer(moment);
   const [modal, setModal] = React.useState(false);
   const [modstartTime, modsetStartTime] = React.useState(new Date());
@@ -52,15 +51,12 @@ export function Cal_comp({ ccode, events }) {
     setModal(false);
   };
 
-  //onSelectEvent={()=> setMod({render: true }) }
-
-  // { mod.render && (<Modify ccode={ccode}  />)}
   return (
     <div style={{ height: '100%' }}>
       <Calendar
         //   selectable
         localizer={localizer}
-        events={events}
+        events={eventsToShow}
         step={60}
         defaultView={Views.MONTHS}
         max={dates.add(dates.endOf(new Date(2015, 17, 1), 'day'), -1, 'hours')}
