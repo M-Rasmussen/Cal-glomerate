@@ -59,13 +59,15 @@ def add_event(ccode, title, start, end, desc):
     db.session.add(addedEvent)
     db.session.commit()
     return addedEvent.id
-def mod_event(ccode, title, start, end, desc,event_id):
+
+
+def mod_event(ccode, title, start, end, desc, event_id):
     """
     modifies an event, returns id of added event
     """
-    event = db.session.query(models.Event).filter(models.Event.id==event_id).first()
+    event = db.session.query(models.Event).filter(models.Event.id == event_id).first()
     event.id = event_id
-    event.title= title
+    event.title = title
     event.ccode = ccode
     event.start = start
     event.end = end
@@ -165,7 +167,9 @@ def on_new_google_user(data):
             .all()
         ]
         socketio.emit(
-            "Verified", {"name": data["name"], "ccodes": all_ccodes, "userid": userid}, room=sid
+            "Verified",
+            {"name": data["name"], "ccodes": all_ccodes, "userid": userid},
+            room=sid,
         )
         return userid
     except ValueError:
@@ -187,7 +191,14 @@ def on_add_calendar(data):
     private = data["privateCal"]
     print(private)
     ccode = add_calendar_for_user(userid, private)
-    print("Added calendar for user ", userid, "With ccode ", ccode, " Private flag: ", private)
+    print(
+        "Added calendar for user ",
+        userid,
+        "With ccode ",
+        ccode,
+        " Private flag: ",
+        private,
+    )
 
 
 @socketio.on("get events")
@@ -214,10 +225,17 @@ def on_new_event(data):
     print("SENDING INDIVIDUAL EVENT")
     socketio.emit(
         "calender_event",
-        {"title": title, "start": start, "end": end, "eventid": addedEventId, "ccode": [ccode]},
+        {
+            "title": title,
+            "start": start,
+            "end": end,
+            "eventid": addedEventId,
+            "ccode": [ccode],
+        },
         room=get_sid(),
     )
     return addedEventId
+
 
 @socketio.on("modify event")
 def on_modify_event(data):
@@ -233,11 +251,9 @@ def on_modify_event(data):
     event_id = data["event_id"]
     print(start)
     print(end)
-    mod_event([ccode], title, start, end,"some words", event_id)
+    mod_event([ccode], title, start, end, "some words", event_id)
 
 
-    
-    
 @socketio.on("cCodeToMerge")
 def on_merge_calendar(data):
     merge_code = int(data["userToMergeWith"])
@@ -245,9 +261,7 @@ def on_merge_calendar(data):
     cal_code = int(data["currentUser"])
     checkExists = db.session.query(models.Calendars).filter_by(ccode=merge_code).first()
     print(checkExists)
-    exists = (
-        checkExists is not None and not checkExists.private
-    )
+    exists = checkExists is not None and not checkExists.private
     try:
         if not exists:
             raise ValueError
@@ -261,14 +275,16 @@ def on_merge_calendar(data):
                 db.session.commit()
             emit_events_to_calender("recieve all events", cal_code)
     except ValueError:
-        print("Ccode does not exist, or you have attempted to merge with a private calendar.")
+        print(
+            "Ccode does not exist, or you have attempted to merge with a private calendar."
+        )
 
 
 @app.route("/")
 def hello():
     """
     Runs at page-load.
-    
+
     """
     models.db.create_all()
     db.session.commit()
