@@ -3,10 +3,12 @@ import {
   Checkbox,
   DefaultButton,
   Stack,
-  TextField
+  TextField,
+  IconButton,
+  IIconProps,
 } from 'office-ui-fabric-react';
 import React, { useEffect, useState } from 'react';
-
+import { Create_cal } from './Add_Cal';
 export function CalendarSelector({ events, setEventsToShow }) {
   const ccodes = [...new Set(events.map((event) => event.ccode[0]))];
 
@@ -27,6 +29,8 @@ export function CalendarSelector({ events, setEventsToShow }) {
     setEventsToShow(events.filter((event) => showCcode[event.ccode[0]]));
   };
 
+ const emojiIcon = { iconName: 'Settings' };
+
   return (
     <div>
       <Stack tokens={{ childrenGap: 10 }}>
@@ -39,6 +43,7 @@ export function CalendarSelector({ events, setEventsToShow }) {
               <Stack.Item grow={1}>
                 {ccodes.map((ccode) => {
                   return (
+                    <div>
                     <Checkbox
                       label={`ccode: ${ccode}`}
                       checked={showCcode[ccode]}
@@ -46,6 +51,8 @@ export function CalendarSelector({ events, setEventsToShow }) {
                         toggleCcode(ccode);
                       }}
                     />
+                    <IconButton iconProps={emojiIcon} title="Settings" ariaLabel="Settings" onClick={() => {console.log(ccode)}} />
+                    </div>
                   );
                 })}
               </Stack.Item>
