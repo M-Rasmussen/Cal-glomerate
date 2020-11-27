@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { Socket } from './Socket';
 import TimePicker from 'react-time-picker';
+import Dropdown from 'react-dropdown';
+import 'react-dropdown/style.css';
 import {
   ContextualMenu,
   DatePicker,
@@ -18,14 +20,22 @@ export function Create_event(props) {
   const [endTime, setEndTime] = React.useState('11:00');
   const [title, setTitle] = React.useState('Title');
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [pickedCode, setpickedCode] = useState(0);
   //   const now = moment().hour(0).minute(0);
   //   const format = 'hh:mm a';
   //   React.useEffect(() => {
   //     Socket.emit('get events', props.ccode[0]);
   //   }, []);
-
+  const cal_options = props.ccode;
+  console.log("here are options: " , cal_options)
+  console.log(typeof(cal_options))
+  const defaultOption = cal_options[0];
+  console.log(typeof(defaultOption))
+  console.log("Current" ,pickedCode)
   const handleSubmit = (event) => {
+    
     event.preventDefault();
+    
     console.log(title);
     console.log(selectedDate);
     console.log(startTime);
@@ -38,12 +48,13 @@ export function Create_event(props) {
       selectedDate.toISOString().split('T')[0] + ' ' + endTime
     ).format('X');
     console.log(start);
+    console.log(props.ccode);
     Socket.emit('new event', {
       title: title,
       date: selectedDate,
       start,
       end,
-      ccode: props.ccode[0]
+      ccode: pickedCode['value']
     });
     setModal(false);
   };
@@ -76,7 +87,10 @@ export function Create_event(props) {
         <form onSubmit={handleSubmit}>
           <Stack tokens={{ childrenGap: 10, padding: 20 }}>
             <h1>Add Event</h1>
-
+            <h3>Select Calendar </h3>
+            <Dropdown options={cal_options} value={defaultOption} onChange={(val) => {
+                setpickedCode(val);
+              }}  placeholder={defaultOption}  />
             <h3> Title </h3>
             <TextField
               label="title"

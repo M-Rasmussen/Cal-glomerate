@@ -13,6 +13,7 @@ export function HomePage({ ccode, userId }) {
   const [events, setEvents] = React.useState([]);
   const [eventsToShow, setEventsToShow] = React.useState([]);
   console.log(events);
+  console.log(ccode)
   React.useEffect(() => {
     Socket.emit('get events', ccode[0]);
     Socket.on('recieve all events', (data) => {

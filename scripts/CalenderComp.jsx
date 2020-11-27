@@ -36,7 +36,6 @@ export function Cal_comp({ ccode, eventsToShow }) {
     const start = moment(
       modselectedDate.toISOString().split('T')[0] + ' ' + modstartTime
     ).format('X');
-
     const end = moment(
       modselectedDate.toISOString().split('T')[0] + ' ' + modendTime
     ).format('X');
