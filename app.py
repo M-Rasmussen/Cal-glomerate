@@ -74,7 +74,11 @@ def mod_event(ccode, title, start, end, desc, event_id):
     event.desc = desc
     db.session.commit()
     emit_events_to_calender("recieve all events", ccode)
-
+def delete_cal(ccode):
+    
+    db.session.query(models.Calendars).filter(models.Calendars.ccode == ccode).delete()
+    db.session.query(models.Event).filter(models.Event.ccode == [ccode]).delete()
+    db.session.commit()
 
 def add_calendar_for_user(userid, privFlag):
 
@@ -252,7 +256,14 @@ def on_modify_event(data):
     print(start)
     print(end)
     mod_event([ccode], title, start, end, "some words", event_id)
-
+    
+@socketio.on("delete calendar")
+def on_delete_cal(data):
+    """
+    add a new event for to calendar
+    """
+    ccode = data['ccode']
+    delete_cal(ccode)
 
 @socketio.on("cCodeToMerge")
 def on_merge_calendar(data):
