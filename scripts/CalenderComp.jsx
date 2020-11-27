@@ -36,7 +36,6 @@ export function Cal_comp({ ccode, eventsToShow }) {
     const start = moment(
       modselectedDate.toISOString().split('T')[0] + ' ' + modstartTime
     ).format('X');
-
     const end = moment(
       modselectedDate.toISOString().split('T')[0] + ' ' + modendTime
     ).format('X');
@@ -51,12 +50,12 @@ export function Cal_comp({ ccode, eventsToShow }) {
     setModal(false);
   };
   function modEventTime(event){
-  let unformattedStart= new Date(event.start).toISOString();
-  let formattedStart = unformattedStart.slice(11,16);
+  let unformattedStart= new Date(event.start).toLocaleTimeString('en-US', { hour12: false });
+  let formattedStart = unformattedStart.slice(0,5);
   modsetStartTime(formattedStart);
 
-  let unformattedEnd= new Date(event.end).toISOString();
-  let formattedEnd = unformattedEnd.slice(11,16);
+  let unformattedEnd= new Date(event.end).toLocaleTimeString('en-US', { hour12: false });
+  let formattedEnd = unformattedEnd.slice(0,5);
   modsetEndTime(formattedEnd);
   }
   return (
@@ -74,10 +73,7 @@ export function Cal_comp({ ccode, eventsToShow }) {
           setModal(true);
           modsetTitle(event.title);
           modsetSelectedDate(event.start);
-          //logic go add event here. have to format it to show the date, along with the time "11:00"
           modEventTime(event);
-          // modsetStartTime(logEvents(event.start));
-          //modsetEndTime(event.end);
           modSetEventId(event.event_id);
         }}
         eventPropGetter={(event, start, end, isSelected) => {
