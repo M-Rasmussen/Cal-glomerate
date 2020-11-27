@@ -20,8 +20,8 @@ import {
 export function Cal_comp({ ccode, eventsToShow }) {
   const localizer = momentLocalizer(moment);
   const [modal, setModal] = React.useState(false);
-  const [modstartTime, modsetStartTime] = React.useState(new Date());
-  const [modendTime, modsetEndTime] = React.useState(new Date());
+  const [modstartTime, modsetStartTime] = React.useState("11:00");
+  const [modendTime, modsetEndTime] = React.useState("14:00");
   const [modtitle, modsetTitle] = React.useState('Title');
   const [modselectedDate, modsetSelectedDate] = useState(new Date());
   const [modEventId, modSetEventId] = useState(0);
@@ -49,7 +49,15 @@ export function Cal_comp({ ccode, eventsToShow }) {
     });
     setModal(false);
   };
+  function modEventTime(event){
+  let unformattedStart= new Date(event.start).toLocaleTimeString('en-US', { hour12: false });
+  let formattedStart = unformattedStart.slice(0,5);
+  modsetStartTime(formattedStart);
 
+  let unformattedEnd= new Date(event.end).toLocaleTimeString('en-US', { hour12: false });
+  let formattedEnd = unformattedEnd.slice(0,5);
+  modsetEndTime(formattedEnd);
+  }
   return (
     <div style={{ height: '100%' }}>
       <Calendar
@@ -65,8 +73,7 @@ export function Cal_comp({ ccode, eventsToShow }) {
           setModal(true);
           modsetTitle(event.title);
           modsetSelectedDate(event.start);
-          modsetStartTime(event.start);
-          modsetEndTime(event.end);
+          modEventTime(event);
           modSetEventId(event.event_id);
         }}
         eventPropGetter={(event, start, end, isSelected) => {
