@@ -79,6 +79,7 @@ export function HomePage({ ccode, userId }) {
             events={events}
             eventsToShow={eventsToShow}
             setEventsToShow={setEventsToShow}
+            userId={userId}
           />
         </Stack>
       </div>
