@@ -16,3 +16,9 @@
   float: right;
   padding: 10px;
 }
+.floatLeft{
+    padding: 0px;
+    width: 80%;
+    float: left;
+    margin: 0px;
+    }

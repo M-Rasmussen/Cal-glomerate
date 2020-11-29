@@ -1,5 +1,8 @@
 import { Card } from '@uifabric/react-cards';
+import { Socket } from './Socket';
 import {
+  ContextualMenu,
+  Modal,
   Checkbox,
   DefaultButton,
   Stack,
@@ -8,8 +11,18 @@ import {
   IIconProps,
 } from 'office-ui-fabric-react';
 import React, { useEffect, useState } from 'react';
-import { Create_cal } from './Add_Cal';
-export function CalendarSelector({ events, setEventsToShow }) {
+import './HomePage.css';
+
+
+export function CalendarSelector({ events, setEventsToShow, userId }) {
+  const [modal, setModal] = useState(false);
+  const [calTitle, setcalTitle] = useState(0);
+  const [priv, setPriv] = useState(false);
+  const [deleteCal, setDeleteCal] = useState(false);
+  const currUser = userId;
+  //NEED TO GET CURRENT USER ID PROPS USER ID TODO
+  
+  
   const ccodes = [...new Set(events.map((event) => event.ccode[0]))];
 
   const [showCcode, setShowCcode] = useState({});
@@ -31,6 +44,22 @@ export function CalendarSelector({ events, setEventsToShow }) {
 
  const emojiIcon = { iconName: 'Settings' };
 
+
+  
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log(calTitle);
+    console.log(priv);
+    console.log("Current user:" + currUser);
+    Socket.emit('modify calendar', {
+      ccode: calTitle,
+      userid: currUser,
+      privateCal: priv,
+      deleteCal: deleteCal
+    });
+    console.log("Emitted!");
+    setModal(false);
+  };
   return (
     <div>
       <Stack tokens={{ childrenGap: 10 }}>
@@ -45,13 +74,23 @@ export function CalendarSelector({ events, setEventsToShow }) {
                   return (
                     <div>
                     <Checkbox
+                      className= "floatLeft"
                       label={`ccode: ${ccode}`}
                       checked={showCcode[ccode]}
                       onChange={() => {
                         toggleCcode(ccode);
                       }}
                     />
-                    <IconButton iconProps={emojiIcon} title="Settings" ariaLabel="Settings" onClick={() => {console.log(ccode)}} />
+                    <IconButton 
+                      style={{ width: '20%' }} 
+                      iconProps={emojiIcon} 
+                      title="Settings" 
+                      ariaLabel="Settings" 
+                      onClick={() => {
+                        setcalTitle(ccode);
+                        setModal(true);
+                        
+                      }} />
                     </div>
                   );
                 })}
@@ -60,6 +99,41 @@ export function CalendarSelector({ events, setEventsToShow }) {
           </Card.Item>
         </Card>
       </Stack>
+      <Modal
+        titleAriaId={'Add Calendar'}
+        isOpen={modal}
+        onDismiss={() => {
+          setModal(false);
+        }}
+        isBlocking={false}
+        // containerClassName={contentStyles.container}
+        dragOptions={{
+          moveMenuItemText: 'Move',
+          closeMenuItemText: 'Close',
+          menu: ContextualMenu
+        }}
+      >
+        <form onSubmit={handleSubmit}>
+          <Stack tokens={{ childrenGap: 10, padding: 20 }}>
+            
+            <h3> ccode:{ calTitle } </h3>
+           
+            <Checkbox
+            label='Toggle to change calendar privacy'
+            onChange={() => {
+                        setPriv(!priv);
+            }}
+                    />
+            <Checkbox
+            label='Toggle to Delete Calendar'
+            onChange={() => {
+                        setDeleteCal(!priv);
+            }}
+                    />
+            <DefaultButton onClick={handleSubmit}>Confirm changes</DefaultButton>
+          </Stack>
+        </form>
+      </Modal>
     </div>
   );
 }
