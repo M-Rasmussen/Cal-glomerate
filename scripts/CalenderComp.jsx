@@ -58,6 +58,21 @@ export function Cal_comp({ ccode, eventsToShow }) {
   let formattedEnd = unformattedEnd.slice(0,5);
   modsetEndTime(formattedEnd);
   }
+  const handleDelete = (event) => {
+    event.preventDefault();
+    console.log(modtitle);
+    console.log(modselectedDate);
+    console.log(modstartTime);
+    console.log(modendTime);
+    console.log(modEventId);
+    
+    Socket.emit('delete event', {
+      
+      ccode: ccode[0],
+      event_id: modEventId
+    });
+    setModal(false);
+  };
   return (
     <div style={{ height: '100%' }}>
       <Calendar
@@ -104,6 +119,7 @@ export function Cal_comp({ ccode, eventsToShow }) {
         }}
       >
         {' '}
+        
         <form onSubmit={handleSubmit}>
           <Stack tokens={{ childrenGap: 10, padding: 20 }}>
             <h1>{modtitle}</h1>
@@ -131,8 +147,10 @@ export function Cal_comp({ ccode, eventsToShow }) {
             </Stack.Item>
 
             <DefaultButton onClick={handleSubmit}>Send</DefaultButton>
+            
           </Stack>
         </form>
+        <DefaultButton onClick={handleDelete}>Delete </DefaultButton>
       </Modal>
     </div>
   );
