@@ -110,7 +110,7 @@ def emit_events_to_calender(channel, cal_code):
     """
     sid = get_sid()
     all_events = []
-    for ccode in [1, 2]:
+    for ccode in cal_code:
         eventsForCcode = [
             {
                 "start": record.start,
@@ -208,6 +208,10 @@ def on_add_calendar(data):
         " Private flag: ",
         private,
     )
+    time=datetime.strftime(datetime.utcnow(), "%s")
+    print(time)
+    addedEventId = add_event([ccode], "Created Calendar At", time, time, "some words")
+    print(addedEventId)
 
 
 @socketio.on("get events")

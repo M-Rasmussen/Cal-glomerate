@@ -40,6 +40,7 @@ export function CalendarSelector({ events, setEventsToShow, userId }) {
     newShowCcode[ccode] = !newShowCcode[ccode];
     setShowCcode(newShowCcode);
     setEventsToShow(events.filter((event) => showCcode[event.ccode[0]]));
+    //filter out event. 
   };
 
  const emojiIcon = { iconName: 'Settings' };
