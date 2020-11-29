@@ -124,7 +124,7 @@ def emit_events_to_calender(channel, cal_code):
             .all()
         ]
         all_events.extend(eventsForCcode)
-
+    
     for event in all_events:
         print(event)
     socketio.emit(channel, all_events, room=sid)
@@ -280,6 +280,8 @@ def on_delete_event(data):
 @socketio.on("cCodeToMerge")
 def on_merge_calendar(data):
     merge_code = int(data["userToMergeWith"])
+    currentLists=(data["currentList"])
+    print(currentLists)
     print("LOOKING FOR CALCODE", data["userToMergeWith"])
     cal_code = int(data["currentUser"])
     checkExists = db.session.query(models.Calendars).filter_by(ccode=merge_code).first()
@@ -296,7 +298,8 @@ def on_merge_calendar(data):
             if cal_code not in record.ccode:
                 record.ccode.append(cal_code)
                 db.session.commit()
-            emit_events_to_calender("recieve all events", cal_code)
+            currentLists.append(cal_code)
+            emit_events_to_calender("recieve all events", currentLists)
     except ValueError:
         print(
             "Ccode does not exist, or you have attempted to merge with a private calendar."
