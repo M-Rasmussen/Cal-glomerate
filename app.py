@@ -19,10 +19,11 @@ from datetime import datetime
 from oauth2client import client
 import httplib2
 from googleapiclient.discovery import build
-API_NAME = 'calendar'
-API_VERSION = 'v3'
-SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-CLIENT_SECRET_FILE = 'credentials.json'
+
+API_NAME = "calendar"
+API_VERSION = "v3"
+SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+CLIENT_SECRET_FILE = "credentials.json"
 from iteration_utilities import unique_everseen
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
@@ -83,9 +84,9 @@ def mod_event(ccode, title, start, end, desc, event_id):
     event.end = end
     event.desc = desc
     db.session.commit()
-    
-    
-    
+    emit_events_to_calender("recieve all events", ccode)
+
+
 def del_event(event_id, ccode):
     """
     Deletes an event and returns the id of the deleted event.
@@ -95,12 +96,12 @@ def del_event(event_id, ccode):
     return event_id
 
 
-    
 def delete_cal(ccode):
-    
+
     db.session.query(models.Calendars).filter(models.Calendars.ccode == ccode).delete()
     db.session.query(models.Event).filter(models.Event.ccode == [ccode]).delete()
     db.session.commit()
+
 
 def add_calendar_for_user(userid, privFlag):
 
@@ -142,15 +143,38 @@ def emit_events_to_calender(channel, cal_code):
         ]
         all_events.extend(eventsForCcode)
 
-    all_events= list(unique_everseen(all_events))
+    all_events = list(unique_everseen(all_events))
     for event in all_events:
         print(event)
     socketio.emit(channel, all_events, room=sid)
-    
+
+
 def rfc3339_to_unix(timestamp):
-    _date_obj=iso8601.parse_date(timestamp)
+    _date_obj = iso8601.parse_date(timestamp)
     _date_unix = _date_obj.timestamp()
     return _date_unix
+
+
+def emit_ccode_to_calender(channel, ccodes):
+    """
+    emits details about a ccode
+    """
+    sid = get_sid()
+    ccodeDetails = {}
+    for ccode in ccodes:
+        record = (
+            db.session.query(models.Calendars)
+            .filter(models.Calendars.ccode == ccode)
+            .first()
+        )
+        detailsForCcode = {
+            "userid": record.userid,
+            "private": record.private,
+        }
+        ccodeDetails[record.ccode] = detailsForCcode
+
+    if len(ccodeDetails) > 0:
+        socketio.emit(channel, ccodeDetails, room=sid)
 
 
 ##SOCKET EVENTS
@@ -200,13 +224,18 @@ def on_new_google_user(data):
         ]
         socketio.emit(
             "Verified",
-            {"name": data["name"], "ccodes": all_ccodes, "userid": userid, "access_token":data["access_token"]},
+            {
+                "name": data["name"],
+                "ccodes": all_ccodes,
+                "userid": userid,
+                "access_token": data["access_token"],
+            },
             room=sid,
         )
-        # 
+        #
         print("printing all CCODES")
         print(all_ccodes)
-        # 
+        #
         return userid
     except ValueError:
         # Invalid token
@@ -216,13 +245,15 @@ def on_new_google_user(data):
         print("Malformed token.")
         return "Unverified."
 
+
 @socketio.on("delete calendar")
 def on_delete_cal(data):
     """
     add a new event for to calendar
     """
-    ccode = data['ccode']
+    ccode = data["ccode"]
     delete_cal(ccode)
+
 
 @socketio.on("add calendar")
 def on_add_calendar(data):
@@ -244,7 +275,7 @@ def on_add_calendar(data):
         " Private flag: ",
         private,
     )
-    time=datetime.strftime(datetime.utcnow(), "%s")
+    time = datetime.strftime(datetime.utcnow(), "%s")
     print(time)
     addedEventId = add_event([ccode], "Created Calendar At", time, time, "some words")
     print(addedEventId)
@@ -255,9 +286,7 @@ def on_add_calendar(data):
         "update dropdown",
         {
             "ccode": ccode,
-            
-        }
-        
+        },
     )
 
 
@@ -269,6 +298,13 @@ def send_events_to_calendar(data):
     print(type(data))
     emit_events_to_calender("recieve all events", data)
     print("SENT EVENTS!")
+
+
+@socketio.on("get ccode details")
+def send_ccode_to_calendar(data):
+    print("getting details for ccode: ", data)
+    emit_ccode_to_calender("recieve ccode details", data)
+    print("SENT ccode!")
 
 
 @socketio.on("new event")
@@ -311,7 +347,7 @@ def on_modify_event(data):
     end = data["end"]
     ccode = data["ccode"]
     event_id = data["event_id"]
-    ccode_list=data["ccode_list"]
+    ccode_list = data["ccode_list"]
     print(start)
     print(end)
     mod_event([ccode], title, start, end, "some words", event_id)
@@ -319,6 +355,7 @@ def on_modify_event(data):
     print("print form mod event")
     print(type(ccode_list))
     emit_events_to_calender("recieve all events", ccode_list)
+
 
 @socketio.on("delete event")
 def on_delete_event(data):
@@ -329,14 +366,15 @@ def on_delete_event(data):
     print(data)
     event_id = data["event_id"]
     ccode = data["ccode"]
-    ccode_list=data["ccode_list"]
-    deleteid=del_event(event_id, [ccode])
+    ccode_list = data["ccode_list"]
+    deleteid = del_event(event_id, [ccode])
     print(deleteid)
     # EMIT EVENTS TO CALENDAR
     print("emit form delete event")
     print(type(ccode_list))
     emit_events_to_calender("recieve all events", ccode_list)
-    
+
+
 @socketio.on("cCodeToMerge")
 def on_merge_calendar(data):
     ccode_list = data["ccode_list"]
@@ -357,53 +395,68 @@ def on_merge_calendar(data):
             if cal_code not in record.ccode:
                 record.ccode.append(cal_code)
                 db.session.commit()
-                
+
         # emit events to calendar
-        # 
+        #
         print("Merge Calendar")
         print("ccode List")
         print(ccode_list)
-        
+
         print("cal_code")
         print(cal_code)
-        
+
         print("cal_code appended")
         ccode_list.append(merge_code)
         print(ccode_list)
-        
+
         emit_events_to_calender("recieve all events", ccode_list)
     except ValueError:
         print(
             "Ccode does not exist, or you have attempted to merge with a private calendar."
         )
-        
+
+
 @socketio.on("Import Calendar")
 def on_import_calendar(data):
     """
     import primary google calendar for user
     """
-    access_token=data["accessToken"]
+    access_token = data["accessToken"]
     private = data["privateCal"]
     userid = data["userid"]
     ccode_list = data["ccode_list"]
-    creds = client.AccessTokenCredentials(access_token, 'my-user-agent/1.0')
-    service = build('calendar', 'v3', credentials=creds)
-    print('Getting all primary calendar events')
-    events_result = service.events().list(calendarId='primary', singleEvents=True,
-                                        orderBy='startTime').execute()
-    events = events_result.get('items', [])
+    creds = client.AccessTokenCredentials(access_token, "my-user-agent/1.0")
+    service = build("calendar", "v3", credentials=creds)
+    print("Getting all primary calendar events")
+    events_result = (
+        service.events()
+        .list(calendarId="primary", singleEvents=True, orderBy="startTime")
+        .execute()
+    )
+    events = events_result.get("items", [])
     if not events:
-        print('No upcoming events found. Initializing empty calendar.')
+        print("No upcoming events found. Initializing empty calendar.")
     ccode = add_calendar_for_user(userid, private)
     ccode_list.append(ccode)
     for event in events:
-        if event['start'].get('dateTime') == None or event['end'].get('dateTime') == None:
+        if (
+            event["start"].get("dateTime") == None
+            or event["end"].get("dateTime") == None
+        ):
             continue
-        start = int(rfc3339_to_unix(str(event['start'].get('dateTime'))))
-        end =  int(rfc3339_to_unix(str(event['end'].get('dateTime'))))
-        title = (event['summary'][:117] + '..') if len(event['summary']) > 117 else event['summary']
+        start = int(rfc3339_to_unix(str(event["start"].get("dateTime"))))
+        end = int(rfc3339_to_unix(str(event["end"].get("dateTime"))))
+        title = (
+            (event["summary"][:117] + "..")
+            if len(event["summary"]) > 117
+            else event["summary"]
+        )
         try:
-            desc = (event['description'][:117] + '..') if len(event['description']) > 117 else event['description']
+            desc = (
+                (event["description"][:117] + "..")
+                if len(event["description"]) > 117
+                else event["description"]
+            )
         except KeyError:
             desc = "some desc"
         addedEventId = add_event([ccode], title, start, end, desc)
@@ -413,10 +466,9 @@ def on_import_calendar(data):
         "update dropdown",
         {
             "ccode": ccode,
-            
-        }
-        
+        },
     )
+
 
 @app.route("/")
 def hello():
