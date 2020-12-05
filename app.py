@@ -16,6 +16,7 @@ from google.auth.transport import requests
 from datetime import datetime
 from oauth2client import client
 import httplib2
+from googleapiclient.discovery import build
 
 
 API_NAME = 'calendar'
@@ -323,12 +324,22 @@ def on_import_calendar(data):
     """
     import primary google calendar for user
     """
-    print(data)
-    # credentials = client.AccessTokenCredentials(data, 'my-user-agent/1.0')
-    # http = httplib2.Http()
-    # http = credentials.authorize(http)
-    
-  
+    access_token=data["accessToken"]
+    creds = client.AccessTokenCredentials(access_token, 'my-user-agent/1.0')
+    print(creds)
+    service = build('calendar', 'v3', credentials=creds)
+    now = datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    print('Getting the upcoming 10 events')
+    events_result = service.events().list(calendarId='primary', timeMin=now,
+                                        maxResults=10, singleEvents=True,
+                                        orderBy='startTime').execute()
+    events = events_result.get('items', [])
+
+    if not events:
+        print('No upcoming events found.')
+    for event in events:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        print(start, event['summary'])
 
 @app.route("/")
 def hello():
