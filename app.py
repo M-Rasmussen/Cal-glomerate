@@ -115,7 +115,7 @@ def emit_events_to_calender(channel, cal_code):
     """
     sid = get_sid()
     all_events = []
-    for ccode in [1, 2]:
+    for ccode in [0, 5]:
         eventsForCcode = [
             {
                 "start": record.start,
@@ -219,6 +219,14 @@ def on_add_calendar(data):
         ccode,
         " Private flag: ",
         private,
+    )
+    socketio.emit(
+        "update dropdown",
+        {
+            "ccode": ccode,
+            
+        }
+        
     )
 
 
