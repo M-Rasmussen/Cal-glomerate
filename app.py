@@ -73,16 +73,20 @@ def mod_event(ccode, title, start, end, desc, event_id):
     event.end = end
     event.desc = desc
     db.session.commit()
-    emit_events_to_calender("recieve all events", ccode)
+    
+    
     
 def del_event(event_id, ccode):
     """
     Deletes an event and returns the id of the deleted event.
     """
-    db.session.query(models.Event).filter(models.Event.id == event_id).delete()
+    # db.session.query(models.Event).filter(models.Event.id == event_id).delete()
+    event=db.session.query(models.Event).filter(models.Event.id == event_id)
+    db.session.delete(event)
     db.session.commit
-    emit_events_to_calender("recieve all events", ccode)
     return event_id
+
+
     
 def delete_cal(ccode):
     
@@ -115,7 +119,7 @@ def emit_events_to_calender(channel, cal_code):
     """
     sid = get_sid()
     all_events = []
-    for ccode in [1, 2]:
+    for ccode in cal_code:
         eventsForCcode = [
             {
                 "start": record.start,
@@ -185,6 +189,10 @@ def on_new_google_user(data):
             {"name": data["name"], "ccodes": all_ccodes, "userid": userid},
             room=sid,
         )
+        # 
+        print("printing all CCODES")
+        print(all_ccodes)
+        # 
         return userid
     except ValueError:
         # Invalid token
@@ -225,6 +233,9 @@ def on_add_calendar(data):
 @socketio.on("get events")
 def send_events_to_calendar(data):
     print("LOOKING FOR CALCODE: ", data)
+    # EMIT EVENTS TO CALENDAR
+    print("get events socket")
+    print(type(data))
     emit_events_to_calender("recieve all events", data)
     print("SENT EVENTS!")
 
@@ -269,9 +280,14 @@ def on_modify_event(data):
     end = data["end"]
     ccode = data["ccode"]
     event_id = data["event_id"]
+    ccode_list=data["ccode_list"]
     print(start)
     print(end)
     mod_event([ccode], title, start, end, "some words", event_id)
+    # EMIT EVENTS TO CALENDAR
+    print("print form mod event")
+    print(type(ccode_list))
+    emit_events_to_calender("recieve all events", ccode_list)
 
 @socketio.on("delete event")
 def on_delete_event(data):
@@ -282,8 +298,13 @@ def on_delete_event(data):
     print(data)
     event_id = data["event_id"]
     ccode = data["ccode"]
-    del_event(event_id, [ccode])
-    
+    ccode_list=data["ccode_list"]
+    deleteid=del_event(event_id, [ccode])
+    print(deleteid)
+    # EMIT EVENTS TO CALENDAR
+    print("emit form delete event")
+    print(type(ccode_list))
+    emit_events_to_calender("recieve all events", ccode_list)
     
 @socketio.on("cCodeToMerge")
 def on_merge_calendar(data):
@@ -304,6 +325,11 @@ def on_merge_calendar(data):
             if cal_code not in record.ccode:
                 record.ccode.append(cal_code)
                 db.session.commit()
+                
+            # emit events to calendar
+            # 
+            print("Merge Calendar")
+            print(type(cal_code))
             emit_events_to_calender("recieve all events", cal_code)
     except ValueError:
         print(
