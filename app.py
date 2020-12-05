@@ -14,6 +14,14 @@ import flask_sqlalchemy
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from datetime import datetime
+from oauth2client import client
+import httplib2
+
+
+API_NAME = 'calendar'
+API_VERSION = 'v3'
+SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+CLIENT_SECRET_FILE = 'credentials.json'
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
@@ -182,7 +190,7 @@ def on_new_google_user(data):
         ]
         socketio.emit(
             "Verified",
-            {"name": data["name"], "ccodes": all_ccodes, "userid": userid},
+            {"name": data["name"], "ccodes": all_ccodes, "userid": userid, "access_token":data["access_token"]},
             room=sid,
         )
         return userid
@@ -309,7 +317,18 @@ def on_merge_calendar(data):
         print(
             "Ccode does not exist, or you have attempted to merge with a private calendar."
         )
-
+        
+@socketio.on("Import Calendar")
+def on_import_calendar(data):
+    """
+    import primary google calendar for user
+    """
+    print(data)
+    # credentials = client.AccessTokenCredentials(data, 'my-user-agent/1.0')
+    # http = httplib2.Http()
+    # http = credentials.authorize(http)
+    
+  
 
 @app.route("/")
 def hello():
