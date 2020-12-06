@@ -78,7 +78,8 @@
 
 ```npm i rc-time-picker```
 
-
+   8) Python packages:
+```pip install iteration-utilities ```
 
 
 

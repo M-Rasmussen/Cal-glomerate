@@ -9,7 +9,8 @@ export function MergeCalenders({ ccode }) {
     event.preventDefault();
     Socket.emit('cCodeToMerge', {
       currentUser: ccode[0],
-      userToMergeWith: mergeInput
+      userToMergeWith: mergeInput,
+      ccode_list: ccode
     });
     console.log(
       `you entered the C-code ${mergeInput} your calender will merge with that input`

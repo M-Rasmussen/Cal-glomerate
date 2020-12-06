@@ -32,6 +32,20 @@ export function Create_event(props) {
   const defaultOption = cal_options[0];
   console.log(typeof(defaultOption))
   console.log("Current" ,pickedCode)
+  
+  
+  Socket.on('update dropdown', (data) => {
+      
+      let newCal = data['ccode']; 
+      var n = cal_options.includes(newCal)
+      console.log(typeof(newCal))
+      console.log(typeof(n))
+      if (!n){
+        cal_options.push(newCal)
+      }
+      
+    });
+ 
   const handleSubmit = (event) => {
     
     event.preventDefault();
@@ -90,7 +104,7 @@ export function Create_event(props) {
             <h3>Select Calendar </h3>
             <Dropdown options={cal_options} value={defaultOption} onChange={(val) => {
                 setpickedCode(val);
-              }}  placeholder={defaultOption}  />
+              }}  placeholder="Select ccode"/>
             <h3> Title </h3>
             <TextField
               label="title"
