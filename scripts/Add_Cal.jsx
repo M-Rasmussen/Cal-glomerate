@@ -9,11 +9,11 @@ import {
 } from 'office-ui-fabric-react';
 import { Card } from '@uifabric/react-cards';
 
-export function Create_cal(props) {
+export function Create_cal({ userId, ccode }) {
   const [modal, setModal] = useState(false);
   const [title, setTitle] = useState('Title');
   const [priv, setPriv] = useState(false);
-  const currUser = props.userId;
+  const currUser = userId;
   
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -23,7 +23,8 @@ export function Create_cal(props) {
     Socket.emit('add calendar', {
       title: title,
       userid: currUser,
-      privateCal: priv
+      privateCal: priv,
+      ccode_list: ccode
     });
     console.log("Emitted!");
     setModal(false);

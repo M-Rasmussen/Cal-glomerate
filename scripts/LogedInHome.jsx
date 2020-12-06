@@ -13,9 +13,10 @@ export function HomePage({ ccode, userId }) {
   const [events, setEvents] = React.useState([]);
   const [eventsToShow, setEventsToShow] = React.useState([]);
   console.log(events);
-  console.log(ccode)
+  console.log("all of ccodes");
+  console.log(ccode);
   React.useEffect(() => {
-    Socket.emit('get events', ccode[0]);
+    Socket.emit('get events', ccode);
     Socket.on('recieve all events', (data) => {
       console.log(data);
       setEvents(
@@ -57,6 +58,10 @@ export function HomePage({ ccode, userId }) {
         let title = data['title'];
         let event_id = data['eventid'];
         let ccode = data['ccode'];
+        
+        console.log("CONSOLE CCODE");
+        console.log(ccode);
+        
         console.log(event_id);
         console.log('ADDING NEW INDIVIDUAL EVENT');
         setEvents((prevEvents) => [
@@ -74,7 +79,7 @@ export function HomePage({ ccode, userId }) {
         <Stack tokens={{ childrenGap: 20, padding: 5 }}>
           <MergeCalenders ccode={ccode} />
           <Create_event ccode={ccode} />
-          <Create_cal userId={userId} />
+          <Create_cal userId={userId} ccode={ccode} />
           <CalendarSelector
             events={events}
             eventsToShow={eventsToShow}

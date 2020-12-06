@@ -25,14 +25,16 @@ export function Cal_comp({ ccode, eventsToShow }) {
   const [modtitle, modsetTitle] = React.useState('Title');
   const [modselectedDate, modsetSelectedDate] = useState(new Date());
   const [modEventId, modSetEventId] = useState(0);
+  const [modEventCCode, modSetEventCCode] = useState(0);
 
+  
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log(modtitle);
-    console.log(modselectedDate);
-    console.log(modstartTime);
-    console.log(modendTime);
-    console.log(modEventId);
+    // console.log(modtitle);
+    // console.log(modselectedDate);
+    // console.log(modstartTime);
+    // console.log(modendTime);
+    // console.log(modEventId);
     const start = moment(
       modselectedDate.toISOString().split('T')[0] + ' ' + modstartTime
     ).format('X');
@@ -44,8 +46,9 @@ export function Cal_comp({ ccode, eventsToShow }) {
       date: modselectedDate,
       start,
       end,
-      ccode: ccode[0],
-      event_id: modEventId
+      ccode: modEventCCode,
+      event_id: modEventId,
+      ccode_list: ccode
     });
     setModal(false);
   };
@@ -68,11 +71,15 @@ export function Cal_comp({ ccode, eventsToShow }) {
     
     Socket.emit('delete event', {
       
-      ccode: ccode[0],
-      event_id: modEventId
+      ccode: modEventCCode,
+      event_id: modEventId,
+      ccode_list: ccode
+
     });
     setModal(false);
   };
+  console.log("Cal_COMP CCODES");
+  console.log(ccode);
   return (
     <div style={{ height: '100%' }}>
       <Calendar
@@ -90,6 +97,7 @@ export function Cal_comp({ ccode, eventsToShow }) {
           modsetSelectedDate(event.start);
           modEventTime(event);
           modSetEventId(event.event_id);
+          modSetEventCCode(event.ccode[0]);
         }}
         eventPropGetter={(event, start, end, isSelected) => {
           const backgroundColor = randomColor({ seed: event.ccode[0] * 1000 });
@@ -123,6 +131,7 @@ export function Cal_comp({ ccode, eventsToShow }) {
         <form onSubmit={handleSubmit}>
           <Stack tokens={{ childrenGap: 10, padding: 20 }}>
             <h1>{modtitle}</h1>
+            <h3>{modEventCCode}</h3>
             <TextField
               label="title"
               value={modtitle}
