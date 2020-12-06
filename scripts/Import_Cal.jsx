@@ -20,14 +20,12 @@ export function Import_cal({ userId, ccode, access_token }) {
     event.preventDefault();
     console.log(title);
     console.log(priv);
-    console.log("Current user:" + currUser);
-    console.log(accessToken);
     Socket.emit('Import Calendar', {
       title: title,
       userid: currUser,
       privateCal: priv,
-      accessToken: accessToken,
-      ccode_list: ccode
+      ccode_list: ccode,
+      accessToken: accessToken
     });
     console.log("Emitted!");
     setModal(false);

@@ -19,7 +19,6 @@ export function Create_cal({ userId, ccode }) {
     event.preventDefault();
     console.log(title);
     console.log(priv);
-    console.log("Current user:" + currUser);
     Socket.emit('add calendar', {
       title: title,
       userid: currUser,

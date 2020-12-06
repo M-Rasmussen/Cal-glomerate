@@ -81,7 +81,7 @@ export function HomePage({ ccode, userId, access_token }) {
           <MergeCalenders ccode={ccode} />
           <Create_event ccode={ccode} />
           <Create_cal userId={userId} ccode={ccode} />
-          <Import_cal userId={userId} access_token={access_token} />
+          <Import_cal userId={userId} ccode={ccode} access_token={access_token} />
           <CalendarSelector
             events={events}
             eventsToShow={eventsToShow}
