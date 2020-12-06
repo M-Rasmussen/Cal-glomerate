@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 import flask
 import flask_socketio
 import flask_sqlalchemy
+import iso8601
+import pytz
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from datetime import datetime
@@ -124,7 +126,7 @@ def emit_events_to_calender(channel, cal_code):
     """
     sid = get_sid()
     all_events = []
-    for ccode in [1, 2]:
+    for ccode in [13]:
         eventsForCcode = [
             {
                 "start": record.start,
@@ -142,6 +144,11 @@ def emit_events_to_calender(channel, cal_code):
     for event in all_events:
         print(event)
     socketio.emit(channel, all_events, room=sid)
+    
+def rfc3339_to_unix(timestamp):
+    _date_obj=iso8601.parse_date(timestamp)
+    _date_unix = _date_obj.timestamp()
+    return _date_unix
 
 
 ##SOCKET EVENTS
@@ -325,21 +332,29 @@ def on_import_calendar(data):
     import primary google calendar for user
     """
     access_token=data["accessToken"]
+    private = data["privateCal"]
+    userid = data["userid"]
     creds = client.AccessTokenCredentials(access_token, 'my-user-agent/1.0')
-    print(creds)
     service = build('calendar', 'v3', credentials=creds)
-    now = datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    print('Getting the upcoming 10 events')
-    events_result = service.events().list(calendarId='primary', timeMin=now,
-                                        maxResults=10, singleEvents=True,
+    print('Getting all primary calendar events')
+    events_result = service.events().list(calendarId='primary', singleEvents=True,
                                         orderBy='startTime').execute()
     events = events_result.get('items', [])
-
     if not events:
-        print('No upcoming events found.')
+        print('No upcoming events found. Initializing empty calendar.')
+    ccode = add_calendar_for_user(userid, private)
     for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        print(start, event['summary'])
+        if event['start'].get('dateTime') == None or event['end'].get('dateTime') == None:
+            continue
+        start = int(rfc3339_to_unix(str(event['start'].get('dateTime'))))
+        end =  int(rfc3339_to_unix(str(event['end'].get('dateTime'))))
+        title = (event['summary'][:117] + '..') if len(event['summary']) > 117 else event['summary']
+        try:
+            desc = (event['description'][:117] + '..') if len(event['description']) > 117 else event['description']
+        except KeyError:
+            desc = "some desc"
+        addedEventId = add_event([ccode], title, start, end, desc)
+        print(addedEventId)
 
 @app.route("/")
 def hello():
