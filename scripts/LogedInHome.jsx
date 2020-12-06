@@ -3,13 +3,14 @@ import { Cal_comp } from './CalenderComp';
 import { Create_event } from './Add_Event';
 import { MergeCalenders } from './MergeCalComp';
 import { Create_cal } from './Add_Cal';
+import { Import_cal } from './Import_Cal';
 import './HomePage.css';
 import { Stack } from 'office-ui-fabric-react';
 import { Card } from '@uifabric/react-cards';
 import { Socket } from './Socket';
 import { CalendarSelector } from './CalendarSelector';
 
-export function HomePage({ ccode, userId }) {
+export function HomePage({ ccode, userId, access_token }) {
   const [events, setEvents] = React.useState([]);
   const [eventsToShow, setEventsToShow] = React.useState([]);
   console.log(events);
@@ -80,6 +81,7 @@ export function HomePage({ ccode, userId }) {
           <MergeCalenders ccode={ccode} />
           <Create_event ccode={ccode} />
           <Create_cal userId={userId} ccode={ccode} />
+          <Import_cal userId={userId} ccode={ccode} access_token={access_token} />
           <CalendarSelector
             events={events}
             eventsToShow={eventsToShow}

@@ -9,21 +9,23 @@ import {
 } from 'office-ui-fabric-react';
 import { Card } from '@uifabric/react-cards';
 
-export function Create_cal({ userId, ccode }) {
+export function Import_cal({ userId, ccode, access_token }) {
   const [modal, setModal] = useState(false);
   const [title, setTitle] = useState('Title');
   const [priv, setPriv] = useState(false);
   const currUser = userId;
+  const accessToken = access_token;
   
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log(title);
     console.log(priv);
-    Socket.emit('add calendar', {
+    Socket.emit('Import Calendar', {
       title: title,
       userid: currUser,
       privateCal: priv,
-      ccode_list: ccode
+      ccode_list: ccode,
+      accessToken: accessToken
     });
     console.log("Emitted!");
     setModal(false);
@@ -34,7 +36,7 @@ export function Create_cal({ userId, ccode }) {
     <div>
       <Card style={{ background: 'white' }}>
         <DefaultButton
-          text="Add Calendar"
+          text="Import Calendar"
           onClick={() => {
             setModal(true);
           }}
@@ -42,7 +44,7 @@ export function Create_cal({ userId, ccode }) {
         />
       </Card>
       <Modal
-        titleAriaId={'Add Calendar'}
+        titleAriaId={'Import Calendar'}
         isOpen={modal}
         onDismiss={() => {
           setModal(false);
@@ -57,16 +59,7 @@ export function Create_cal({ userId, ccode }) {
       >
         <form onSubmit={handleSubmit}>
           <Stack tokens={{ childrenGap: 10, padding: 20 }}>
-            <h1>Add Calendar</h1>
-
-            <h3> Title </h3>
-            <TextField
-              label="title"
-              value={title}
-              onChange={(val) => {
-                setTitle(val.target.value);
-              }}
-            />
+            <h1>Import Calendar</h1>
             <label for="private"> Make Calendar Private</label>
             <input type="checkbox" id="private" onChange={() => {setPriv(!priv)}} defaultChecked={priv}/>
             <DefaultButton onClick={handleSubmit}>Send</DefaultButton>

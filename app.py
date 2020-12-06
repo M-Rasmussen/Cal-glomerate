@@ -11,9 +11,18 @@ from dotenv import load_dotenv
 import flask
 import flask_socketio
 import flask_sqlalchemy
+import iso8601
+import pytz
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from datetime import datetime
+from oauth2client import client
+import httplib2
+from googleapiclient.discovery import build
+API_NAME = 'calendar'
+API_VERSION = 'v3'
+SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+CLIENT_SECRET_FILE = 'credentials.json'
 from iteration_utilities import unique_everseen
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
@@ -137,6 +146,11 @@ def emit_events_to_calender(channel, cal_code):
     for event in all_events:
         print(event)
     socketio.emit(channel, all_events, room=sid)
+    
+def rfc3339_to_unix(timestamp):
+    _date_obj=iso8601.parse_date(timestamp)
+    _date_unix = _date_obj.timestamp()
+    return _date_unix
 
 
 ##SOCKET EVENTS
@@ -186,7 +200,7 @@ def on_new_google_user(data):
         ]
         socketio.emit(
             "Verified",
-            {"name": data["name"], "ccodes": all_ccodes, "userid": userid},
+            {"name": data["name"], "ccodes": all_ccodes, "userid": userid, "access_token":data["access_token"]},
             room=sid,
         )
         # 
@@ -362,7 +376,47 @@ def on_merge_calendar(data):
         print(
             "Ccode does not exist, or you have attempted to merge with a private calendar."
         )
-
+        
+@socketio.on("Import Calendar")
+def on_import_calendar(data):
+    """
+    import primary google calendar for user
+    """
+    access_token=data["accessToken"]
+    private = data["privateCal"]
+    userid = data["userid"]
+    ccode_list = data["ccode_list"]
+    creds = client.AccessTokenCredentials(access_token, 'my-user-agent/1.0')
+    service = build('calendar', 'v3', credentials=creds)
+    print('Getting all primary calendar events')
+    events_result = service.events().list(calendarId='primary', singleEvents=True,
+                                        orderBy='startTime').execute()
+    events = events_result.get('items', [])
+    if not events:
+        print('No upcoming events found. Initializing empty calendar.')
+    ccode = add_calendar_for_user(userid, private)
+    ccode_list.append(ccode)
+    for event in events:
+        if event['start'].get('dateTime') == None or event['end'].get('dateTime') == None:
+            continue
+        start = int(rfc3339_to_unix(str(event['start'].get('dateTime'))))
+        end =  int(rfc3339_to_unix(str(event['end'].get('dateTime'))))
+        title = (event['summary'][:117] + '..') if len(event['summary']) > 117 else event['summary']
+        try:
+            desc = (event['description'][:117] + '..') if len(event['description']) > 117 else event['description']
+        except KeyError:
+            desc = "some desc"
+        addedEventId = add_event([ccode], title, start, end, desc)
+        print(addedEventId)
+    emit_events_to_calender("recieve all events", ccode_list)
+    socketio.emit(
+        "update dropdown",
+        {
+            "ccode": ccode,
+            
+        }
+        
+    )
 
 @app.route("/")
 def hello():
