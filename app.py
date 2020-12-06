@@ -218,6 +218,8 @@ def on_add_calendar(data):
     print(data)
     userid = data["userid"]
     private = data["privateCal"]
+    ccode_list = data["ccode_list"]
+    print(ccode_list)
     print(private)
     ccode = add_calendar_for_user(userid, private)
     print(
@@ -232,6 +234,8 @@ def on_add_calendar(data):
     print(time)
     addedEventId = add_event([ccode], "Created Calendar At", time, time, "some words")
     print(addedEventId)
+    ccode_list.append(ccode)
+    emit_events_to_calender("recieve all events", ccode_list)
 
     socketio.emit(
         "update dropdown",

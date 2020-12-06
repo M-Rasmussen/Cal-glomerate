@@ -79,7 +79,7 @@ export function HomePage({ ccode, userId }) {
         <Stack tokens={{ childrenGap: 20, padding: 5 }}>
           <MergeCalenders ccode={ccode} />
           <Create_event ccode={ccode} />
-          <Create_cal userId={userId} />
+          <Create_cal userId={userId} ccode={ccode} />
           <CalendarSelector
             events={events}
             eventsToShow={eventsToShow}
