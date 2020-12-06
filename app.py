@@ -233,6 +233,15 @@ def on_add_calendar(data):
     addedEventId = add_event([ccode], "Created Calendar At", time, time, "some words")
     print(addedEventId)
 
+    socketio.emit(
+        "update dropdown",
+        {
+            "ccode": ccode,
+            
+        }
+        
+    )
+
 
 @socketio.on("get events")
 def send_events_to_calendar(data):
