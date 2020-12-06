@@ -9,12 +9,12 @@ import {
 } from 'office-ui-fabric-react';
 import { Card } from '@uifabric/react-cards';
 
-export function Import_cal(props) {
+export function Import_cal({ userId, ccode, access_token }) {
   const [modal, setModal] = useState(false);
   const [title, setTitle] = useState('Title');
   const [priv, setPriv] = useState(false);
-  const currUser = props.userId;
-  const accessToken = props.access_token;
+  const currUser = userId;
+  const accessToken = access_token;
   
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -26,7 +26,8 @@ export function Import_cal(props) {
       title: title,
       userid: currUser,
       privateCal: priv,
-      accessToken: accessToken
+      accessToken: accessToken,
+      ccode_list: ccode
     });
     console.log("Emitted!");
     setModal(false);

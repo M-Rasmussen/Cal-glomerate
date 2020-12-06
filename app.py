@@ -385,6 +385,7 @@ def on_import_calendar(data):
     access_token=data["accessToken"]
     private = data["privateCal"]
     userid = data["userid"]
+    ccode_list = data["ccode_list"]
     creds = client.AccessTokenCredentials(access_token, 'my-user-agent/1.0')
     service = build('calendar', 'v3', credentials=creds)
     print('Getting all primary calendar events')
@@ -394,6 +395,7 @@ def on_import_calendar(data):
     if not events:
         print('No upcoming events found. Initializing empty calendar.')
     ccode = add_calendar_for_user(userid, private)
+    ccode_list.append(ccode)
     for event in events:
         if event['start'].get('dateTime') == None or event['end'].get('dateTime') == None:
             continue
@@ -406,6 +408,15 @@ def on_import_calendar(data):
             desc = "some desc"
         addedEventId = add_event([ccode], title, start, end, desc)
         print(addedEventId)
+    emit_events_to_calender("recieve all events", ccode_list)
+    socketio.emit(
+        "update dropdown",
+        {
+            "ccode": ccode,
+            
+        }
+        
+    )
 
 @app.route("/")
 def hello():
