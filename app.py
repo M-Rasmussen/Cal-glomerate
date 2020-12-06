@@ -14,6 +14,7 @@ import flask_sqlalchemy
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from datetime import datetime
+from iteration_utilities import unique_everseen
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
@@ -80,10 +81,8 @@ def del_event(event_id, ccode):
     """
     Deletes an event and returns the id of the deleted event.
     """
-    # db.session.query(models.Event).filter(models.Event.id == event_id).delete()
-    event=db.session.query(models.Event).filter(models.Event.id == event_id)
-    db.session.delete(event)
-    db.session.commit
+    db.session.query(models.Event).filter(models.Event.id == event_id).delete()
+    db.session.commit()
     return event_id
 
 
@@ -134,6 +133,7 @@ def emit_events_to_calender(channel, cal_code):
         ]
         all_events.extend(eventsForCcode)
 
+    all_events= list(unique_everseen(all_events))
     for event in all_events:
         print(event)
     socketio.emit(channel, all_events, room=sid)
@@ -228,6 +228,10 @@ def on_add_calendar(data):
         " Private flag: ",
         private,
     )
+    time=datetime.strftime(datetime.utcnow(), "%s")
+    print(time)
+    addedEventId = add_event([ccode], "Created Calendar At", time, time, "some words")
+    print(addedEventId)
 
 
 @socketio.on("get events")
@@ -308,6 +312,7 @@ def on_delete_event(data):
     
 @socketio.on("cCodeToMerge")
 def on_merge_calendar(data):
+    ccode_list = data["ccode_list"]
     merge_code = int(data["userToMergeWith"])
     print("LOOKING FOR CALCODE", data["userToMergeWith"])
     cal_code = int(data["currentUser"])
@@ -326,11 +331,20 @@ def on_merge_calendar(data):
                 record.ccode.append(cal_code)
                 db.session.commit()
                 
-            # emit events to calendar
-            # 
-            print("Merge Calendar")
-            print(type(cal_code))
-            emit_events_to_calender("recieve all events", cal_code)
+        # emit events to calendar
+        # 
+        print("Merge Calendar")
+        print("ccode List")
+        print(ccode_list)
+        
+        print("cal_code")
+        print(cal_code)
+        
+        print("cal_code appended")
+        ccode_list.append(merge_code)
+        print(ccode_list)
+        
+        emit_events_to_calender("recieve all events", ccode_list)
     except ValueError:
         print(
             "Ccode does not exist, or you have attempted to merge with a private calendar."
