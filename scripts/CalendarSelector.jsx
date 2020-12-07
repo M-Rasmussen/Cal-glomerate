@@ -8,21 +8,20 @@ import {
   Stack,
   TextField,
   IconButton,
-  IIconProps,
+  IIconProps
 } from 'office-ui-fabric-react';
 import React, { useEffect, useState } from 'react';
 import './HomePage.css';
 
-
 export function CalendarSelector({ events, setEventsToShow, userId }) {
   const [modal, setModal] = useState(false);
   const [calTitle, setcalTitle] = useState(0);
-  const [priv, setPriv] = useState(false);
   const [deleteCal, setDeleteCal] = useState(false);
+  const [ccodeDetails, setCcodeDetails] = useState({});
+
   const currUser = userId;
   //NEED TO GET CURRENT USER ID PROPS USER ID TODO
-  
-  
+
   const ccodes = [...new Set(events.map((event) => event.ccode[0]))];
 
   const [showCcode, setShowCcode] = useState({});
@@ -33,6 +32,12 @@ export function CalendarSelector({ events, setEventsToShow, userId }) {
     console.log(initialshowCcode);
     setShowCcode(initialshowCcode);
     setEventsToShow(events.filter((event) => initialshowCcode[event.ccode[0]]));
+
+    Socket.emit('get ccode details', ccodes);
+    Socket.on('recieve ccode details', (newCcodeDetails) => {
+      console.log(newCcodeDetails);
+      setCcodeDetails(newCcodeDetails);
+    });
   }, [events]);
 
   const toggleCcode = (ccode) => {
@@ -42,24 +47,38 @@ export function CalendarSelector({ events, setEventsToShow, userId }) {
     setEventsToShow(events.filter((event) => showCcode[event.ccode[0]]));
   };
 
- const emojiIcon = { iconName: 'Settings' };
+  const emojiIcon = { iconName: 'Settings' };
 
+  const toggleCcodePrivacy = (ccode) => {
+    const newCcodeDetails = ccodeDetails;
+    newCcodeDetails[ccode] = !newCcodeDetails[ccode];
+    setCcodeDetails(newCcodeDetails);
+  };
 
-  
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log(calTitle);
-    console.log(priv);
-    console.log("Current user:" + currUser);
+    console.log('Current user:' + currUser);
     Socket.emit('modify calendar', {
       ccode: calTitle,
       userid: currUser,
-      privateCal: priv,
+      privateCal: ccodeDetails[calTitle].private,
       deleteCal: deleteCal
     });
-    console.log("Emitted!");
+    console.log('Emitted!');
     setModal(false);
   };
+
+  const getCcodePrivacy = (ccode) => {
+    if (!(ccode in ccodeDetails)) {
+      return 'Unknown!';
+    } else if (ccodeDetails[ccode].private) {
+      return 'Private';
+    } else {
+      return 'Public';
+    }
+  };
+
   return (
     <div>
       <Stack tokens={{ childrenGap: 10 }}>
@@ -73,24 +92,24 @@ export function CalendarSelector({ events, setEventsToShow, userId }) {
                 {ccodes.map((ccode) => {
                   return (
                     <div>
-                    <Checkbox
-                      className= "floatLeft"
-                      label={`ccode: ${ccode}`}
-                      checked={showCcode[ccode]}
-                      onChange={() => {
-                        toggleCcode(ccode);
-                      }}
-                    />
-                    <IconButton 
-                      style={{ width: '20%' }} 
-                      iconProps={emojiIcon} 
-                      title="Settings" 
-                      ariaLabel="Settings" 
-                      onClick={() => {
-                        setcalTitle(ccode);
-                        setModal(true);
-                        
-                      }} />
+                      <Checkbox
+                        className="floatLeft"
+                        label={`ccode: ${ccode} ${getCcodePrivacy(ccode)}`}
+                        checked={showCcode[ccode]}
+                        onChange={() => {
+                          toggleCcode(ccode);
+                        }}
+                      />
+                      <IconButton
+                        style={{ width: '20%' }}
+                        iconProps={emojiIcon}
+                        title="Settings"
+                        ariaLabel="Settings"
+                        onClick={() => {
+                          setcalTitle(ccode);
+                          setModal(true);
+                        }}
+                      />
                     </div>
                   );
                 })}
@@ -115,22 +134,23 @@ export function CalendarSelector({ events, setEventsToShow, userId }) {
       >
         <form onSubmit={handleSubmit}>
           <Stack tokens={{ childrenGap: 10, padding: 20 }}>
-            
-            <h3> ccode:{ calTitle } </h3>
-           
+            <h3> ccode:{calTitle} </h3>
+
             <Checkbox
-            label='Toggle to change calendar privacy'
-            onChange={() => {
-                        setPriv(!priv);
-            }}
-                    />
+              label="Toggle to change calendar privacy"
+              onChange={() => {
+                toggleCcodePrivacy(calTitle);
+              }}
+            />
             <Checkbox
-            label='Toggle to Delete Calendar'
-            onChange={() => {
-                        setDeleteCal(!priv);
-            }}
-                    />
-            <DefaultButton onClick={handleSubmit}>Confirm changes</DefaultButton>
+              label="Toggle to Delete Calendar"
+              onChange={() => {
+                setDeleteCal(!priv);
+              }}
+            />
+            <DefaultButton onClick={handleSubmit}>
+              Confirm changes
+            </DefaultButton>
           </Stack>
         </form>
       </Modal>
