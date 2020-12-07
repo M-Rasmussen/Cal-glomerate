@@ -14,11 +14,12 @@ export function HomePage({ ccode, userId, access_token }) {
   const [events, setEvents] = React.useState([]);
   const [eventsToShow, setEventsToShow] = React.useState([]);
   console.log(events);
-  console.log("all of ccodes");
+  console.log('all of ccodes');
   console.log(ccode);
   React.useEffect(() => {
     Socket.emit('get events', ccode);
     Socket.on('recieve all events', (data) => {
+      console.log('here');
       console.log(data);
       setEvents(
         data.map((event) => {
@@ -59,17 +60,17 @@ export function HomePage({ ccode, userId, access_token }) {
         let title = data['title'];
         let event_id = data['eventid'];
         let ccode = data['ccode'];
-        
-        console.log("CONSOLE CCODE");
+
+        console.log('CONSOLE CCODE');
         console.log(ccode);
-        
+
         console.log(event_id);
         console.log('ADDING NEW INDIVIDUAL EVENT');
+        setEventsToShow([...events, { start, end, title, event_id, ccode }]);
         setEvents((prevEvents) => [
           ...prevEvents,
           { start, end, title, event_id, ccode }
         ]);
-        setEventsToShow(events);
       });
     }, []);
   }
@@ -81,7 +82,11 @@ export function HomePage({ ccode, userId, access_token }) {
           <MergeCalenders ccode={ccode} />
           <Create_event ccode={ccode} />
           <Create_cal userId={userId} ccode={ccode} />
-          <Import_cal userId={userId} ccode={ccode} access_token={access_token} />
+          <Import_cal
+            userId={userId}
+            ccode={ccode}
+            access_token={access_token}
+          />
           <CalendarSelector
             events={events}
             eventsToShow={eventsToShow}
