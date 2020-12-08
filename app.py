@@ -176,6 +176,20 @@ def emit_ccode_to_calender(channel, ccodes):
     if len(ccodeDetails) > 0:
         socketio.emit(channel, ccodeDetails, room=sid)
 
+def exists_in_auth_user(check_id):
+    """
+    Check to see if the auth user is there
+    """
+    return (db.session.query(models.AuthUser.userid).filter_by(userid=check_id).scalar() is not None)
+
+
+def exists_in_calender(merge_code):
+    """
+    Check to see if merge calendar exists
+    """
+    return (db.session.query(models.Calendars.ccode).filter_by(ccode=merge_code).scalar() is not None)
+    
+
 
 ##SOCKET EVENTS
 @socketio.on("connect")
@@ -209,10 +223,7 @@ def on_new_google_user(data):
         )
         userid = idinfo["sub"]
         print("Verified user. Proceeding to check database.")
-        exists = (
-            db.session.query(models.AuthUser.userid).filter_by(userid=userid).scalar()
-            is not None
-        )
+        exists = exists_in_auth_user(userid)
         if not exists:
             push_new_user_to_db(userid, data["name"], data["email"])
             add_calendar_for_user(userid, False)
@@ -381,9 +392,7 @@ def on_merge_calendar(data):
     merge_code = int(data["userToMergeWith"])
     print("LOOKING FOR CALCODE", data["userToMergeWith"])
     cal_code = int(data["currentUser"])
-    checkExists = db.session.query(models.Calendars).filter_by(ccode=merge_code).first()
-    print(checkExists)
-    exists = checkExists is not None and not checkExists.private
+    exists = exists_in_calender(merge_code)
     try:
         if not exists:
             raise ValueError

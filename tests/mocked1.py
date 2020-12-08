@@ -55,8 +55,11 @@ class SQLQueryTestCase(unittest.TestCase):
                 KEY_EXPECTED: None,
             }
         ]
-        self.success_test_params_cal = [{KEY_INPUT: 1, KEY_EXPECTED: None}]
+        self.success_test_params_cal = [{KEY_INPUT: 1, KEY_INPUT2: True, KEY_EXPECTED: None}]
         self.success_test_params_emit = [
+            {KEY_INPUT: "test_channel", KEY_INPUT2: [1], KEY_EXPECTED: None}
+        ]
+        self.success_test_params_send_events_to_cal = [
             {KEY_INPUT: "test_channel", KEY_INPUT2: [1], KEY_EXPECTED: None}
         ]
         self.success_test_params_on_new_event = [
@@ -73,10 +76,17 @@ class SQLQueryTestCase(unittest.TestCase):
         ]
         self.success_test_params_on_new_merge = [
             {
-                KEY_INPUT: {"userToMergeWith": "99", "currentUser": "98"},
+                KEY_INPUT: {"userToMergeWith": "99", "currentUser": "98", "ccode_list": [1,2,3]},
                 KEY_EXPECTED: None,
             }
         ]
+        self.sucess_test_params_check_id = [
+            {
+                KEY_INPUT:{
+                    "check_id": "1",
+                },
+                KEY_EXPECTED:True,
+            },]
 
     def mock_emit(self, channel, test_dict, room="-1"):
         """
@@ -89,6 +99,14 @@ class SQLQueryTestCase(unittest.TestCase):
         sid = "fake sid"
         print("returning: " + sid)
         return sid
+
+    def mocked_exists(self, userid):
+        """"Mocked out to make sure the user exists in the database"""
+        return False
+    
+    def mocked_emit_events_to_calender(self, channel,cal_code):
+        return True
+
 
     def test_push_new_user_to_db(self):
         """
@@ -105,7 +123,7 @@ class SQLQueryTestCase(unittest.TestCase):
     def test_push_new_cal_to_db(self):
         for test_case in self.success_test_params_cal:
             with mock.patch("app.db", AlchemyMagicMock()):
-                response = app.add_calendar_for_user(test_case[KEY_INPUT])
+                response = app.add_calendar_for_user(test_case[KEY_INPUT], test_case[KEY_INPUT2])
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
 
@@ -159,10 +177,18 @@ class SQLQueryTestCase(unittest.TestCase):
             with mock.patch("app.db", AlchemyMagicMock()):
                 with mock.patch("app.socketio.emit", self.mock_emit):
                     with mock.patch("app.get_sid", self.mock_sid):
-                        response = app.on_merge_calendar(test_case[KEY_INPUT])
+                        with mock.patch("app.exists_in_calender", self.mocked_exists):
+                            response = app.on_merge_calendar(test_case[KEY_INPUT])
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
 
+    def test_exists_in_calender(self):
+        for test_case in self.sucess_test_params_check_id:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                response = app.exists_in_calender(
+                    test_case[KEY_INPUT])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
 
 class GoogleLoginTestCase(unittest.TestCase):
     """
@@ -173,7 +199,7 @@ class GoogleLoginTestCase(unittest.TestCase):
         """
         Sets up parameters for dad cases.
         """
-        self.success_test_params = [
+        self.success_test_params_google = [
             {
                 KEY_INPUT: {
                     "name": "Koomi",
@@ -183,7 +209,7 @@ class GoogleLoginTestCase(unittest.TestCase):
                 KEY_EXPECTED: "mock_id",
             }
         ]
-        self.failure_test_params = [
+        self.failure_test_params_google = [
             {
                 KEY_INPUT: {
                     "name": "Koomi",
@@ -201,6 +227,17 @@ class GoogleLoginTestCase(unittest.TestCase):
                 KEY_EXPECTED: "Unverified.",
             },
         ]
+        self.sucess_test_params_check_id = [
+            {
+                KEY_INPUT:{
+                    "check_id": "1",
+                },
+                KEY_EXPECTED:True,
+            },]
+
+    def mocked_exists(self, userid):
+        """"Mocked out to make sure the user exists in the database"""
+        return False
 
     def mocked_verify(self, *args, **kwargs):
         """
@@ -237,13 +274,14 @@ class GoogleLoginTestCase(unittest.TestCase):
         """
         Success cases for on_new_google_user.
         """
-        for test_case in self.success_test_params:
+        for test_case in self.success_test_params_google:
             with mock.patch(
                 "google.oauth2.id_token.verify_oauth2_token", self.mocked_verify
             ):
                 with mock.patch("app.get_sid", self.mocked_flask):
                     with mock.patch("app.db", AlchemyMagicMock()):
-                        response = app.on_new_google_user(test_case[KEY_INPUT])
+                        with mock.patch("app.exists_in_auth_user", self.mocked_exists):
+                            response = app.on_new_google_user(test_case[KEY_INPUT])
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
 
@@ -251,7 +289,7 @@ class GoogleLoginTestCase(unittest.TestCase):
         """
         Failure cases for on_new_google_user.
         """
-        for test_case in self.failure_test_params:
+        for test_case in self.failure_test_params_google:
             with mock.patch(
                 "google.oauth2.id_token.verify_oauth2_token", self.mocked_verify
             ):
@@ -260,7 +298,16 @@ class GoogleLoginTestCase(unittest.TestCase):
                         response = app.on_new_google_user(test_case[KEY_INPUT])
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
-
+    def test_exists_in_auth_user(self):
+        """
+        Test exists in auth user
+        """
+        for test_case in self.sucess_test_params_check_id:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                response = app.exists_in_auth_user(
+                    test_case[KEY_INPUT])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
 
 if __name__ == "__main__":
     unittest.main()
