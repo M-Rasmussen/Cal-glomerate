@@ -461,6 +461,34 @@ def on_import_calendar(data):
     )
 
 
+@socketio.on("modify calendar")
+def on_modify_calendar(data):
+    """
+    modify calendars
+    """
+    print(data)
+    ccode = data["ccode"]
+    private = data["privateCal"]
+    userid = data["userid"]
+    deleteCal = data["deleteCal"]
+
+    calendar = (
+        db.session.query(models.Calendars)
+        .filter(models.Calendars.ccode == ccode)
+        .first()
+    )
+    if calendar:
+        if deleteCal == True:
+            db.session.query(models.Calendars).filter(
+                models.Calendars.ccode == ccode
+            ).delete()
+        elif private == True:
+            calendar.private = True
+        elif private == False:
+            calendar.private = False
+        db.session.commit()
+
+
 @app.route("/")
 def hello():
     """
