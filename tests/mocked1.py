@@ -7,6 +7,10 @@
 # pylint: disable=no-self-use
 # pylint: disable=too-few-public-methods
 # pylint: disable=unused-argument
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=unused-import
+# pylint: disable=wrong-import-order
+
 import unittest
 import unittest.mock as mock
 import sys
@@ -22,6 +26,7 @@ KEY_INPUT2 = "arg2"
 KEY_INPUT3 = "arg3"
 KEY_INPUT4 = "arg4"
 KEY_INPUT5 = "arg5"
+KEY_INPUT6 = "args6"
 KEY_EXPECTED = "expected"
 KEY_MESSAGE = "message"
 KEY_USER = "user"
@@ -86,6 +91,120 @@ class SQLQueryTestCase(unittest.TestCase):
                     "check_id": "1",
                 },
                 KEY_EXPECTED:True,
+            },
+        ]
+        self.success_test_params_delete_cal = [
+            {
+                KEY_INPUT: 1,
+                KEY_EXPECTED:None,
+            },
+        ]
+        self.success_test_params_delete_event = [
+            {
+                KEY_INPUT: 1,
+                KEY_INPUT2: 2,
+                KEY_EXPECTED:None,
+            },
+        ]
+        self.success_test_params_on_delete_cal = [
+            {
+                KEY_INPUT: [1],
+                KEY_EXPECTED:None,
+            },
+        ]
+        self.success_test_params_on_add_calendar = [
+            {
+                KEY_INPUT:{"userid":1,"privateCal":True,"ccode_list":[1,2,3]},
+                KEY_EXPECTED:None,
+            },
+        ]
+        self.success_test_params_on_delete_event= [
+            {
+                KEY_INPUT:{"event_id":1,"ccode":1,"ccode_list":[1,2,3]},
+                KEY_EXPECTED:None,
+            },
+        ]
+        self.success_test_params_on_mod_event = [
+            {
+                KEY_INPUT: [1],
+                KEY_INPUT2: "New Event",
+                KEY_INPUT3: "1605290154",
+                KEY_INPUT4: "1605290054",
+                KEY_INPUT5: "some text",
+                KEY_INPUT6: None,
+                KEY_EXPECTED: None,
+
+            }
+        ]
+        self.success_test_params_on_mod_event_socket = [
+            {
+                KEY_INPUT: {
+                    "title": "Mocked incoming event!",
+                    "event_id": None,
+                    "start": "1605290154",
+                    "end": "1605290054",
+                    "ccode": "99",
+                    "ccode_list": [1,2],
+                },
+                KEY_EXPECTED: None,
+            }
+        ]
+        self.success_test_params_on_merge_cal = [
+            {
+                KEY_INPUT: {
+                    "ccode_list": [1,2],
+                    "userToMergeWith": "00",
+                    "currentUser": "1",
+
+                },
+                KEY_EXPECTED: None,
+            }
+        ]
+        self.success_test_params_on_import = [
+            {
+                KEY_INPUT: {
+                    "accessToken": "sdfdsfdsfdsfsdf",
+                    "privateCal": "f",
+                    "userid": "1605290154",
+                    "ccode_list": [1,2],
+                },
+                KEY_EXPECTED: None,
+            }
+        ]
+        self.success_test_params_google = [
+            {
+                KEY_INPUT: {
+                    "name": "Koomi",
+                    "email": "baconatoring@gmail.com",
+                    "idtoken": "good_mock_token",
+                },
+                KEY_EXPECTED: "mock_id",
+            }
+        ]
+        self.failure_test_params_google = [
+            {
+                KEY_INPUT: {
+                    "name": "Koomi",
+                    "email": "baconatoring@gmail.com",
+                    "idtoken": "bad_mock_token",
+                },
+                KEY_EXPECTED: "Unverified.",
+            },
+            {
+                KEY_INPUT: {
+                    "name": "Koomi",
+                    "email": "baconatoring@gmail.com",
+                    "idtoken": "vvmock_token",
+                },
+                KEY_EXPECTED: "Unverified.",
+            },
+        ]
+        self.sucess_test_params_check_id = [
+            {
+                KEY_INPUT:{
+                    "check_id": "1",
+                },
+                KEY_EXPECTED:True,
             },]
 
     def mock_emit(self, channel, test_dict, room="-1"):
@@ -96,6 +215,9 @@ class SQLQueryTestCase(unittest.TestCase):
         return {"channel": channel, "test_dict": test_dict}
 
     def mock_sid(self):
+        """
+        Mockks out request sid
+        """
         sid = "fake sid"
         print("returning: " + sid)
         return sid
@@ -105,8 +227,10 @@ class SQLQueryTestCase(unittest.TestCase):
         return False
     
     def mocked_emit_events_to_calender(self, channel,cal_code):
+        """
+        Mocks out emit events to calender
+        """
         return True
-
 
     def test_push_new_user_to_db(self):
         """
@@ -189,51 +313,169 @@ class SQLQueryTestCase(unittest.TestCase):
                     test_case[KEY_INPUT])
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
+    def test_delete_cal(self):
+        for test_case in self.success_test_params_delete_cal:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                response = app.delete_cal(
+                    test_case[KEY_INPUT])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
+    def test_delete_event(self):
+        for test_case in self.success_test_params_delete_event:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                response = app.del_event(
+                    test_case[KEY_INPUT], test_case[KEY_INPUT2])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
+    # def test_rfc3339_to_unix(self):
+    #     for test_case in self.success_test_params_delete_event:
+    #         with mock.patch()
+    # def test_on_delete_cal(self):
+    #     for test_case in self.success_test_params_on_delete_cal:
+    #         with mock.patch("app.db", AlchemyMagicMock()):
+    #             response=app.on_delete_cal(test_case[KEY_INPUT])
+    #         expected = test_case[KEY_EXPECTED]
+    #         self.assertEqual(response, expected)
 
-class GoogleLoginTestCase(unittest.TestCase):
-    """
-    Sets up test cases Google Oauth.
-    """
+    def test_on_add_calendar(self):
+        for test_case in self.success_test_params_on_add_calendar:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                with mock.patch("app.socketio.emit", self.mock_emit):
+                    with mock.patch("app.emit_events_to_calender", self.mock_emit):
+                        response = app.on_add_calendar(
+                            test_case[KEY_INPUT])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
+    def test_send_events_to_calendar(self):
+        for test_case in self.success_test_params_send_events_to_cal:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                with mock.patch("app.emit_events_to_calender", self.mock_emit):
+                    response = app.send_events_to_calendar(
+                        test_case[KEY_INPUT])
+            expected= test_case[KEY_EXPECTED]
+            self.assertEqual(response,expected)
+    
+    def test_send_ccode_to_calendar(self):
+        for test_case in self.success_test_params_send_events_to_cal:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                with mock.patch("app.emit_ccode_to_calender", self.mock_emit):
+                    response = app.send_ccode_to_calendar(
+                        test_case[KEY_INPUT])
+            expected= test_case[KEY_EXPECTED]
+            self.assertEqual(response,expected)
+    
+    def test_mod_event(self):
+        for test_case in self.success_test_params_on_mod_event:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                with mock.patch("app.emit_events_to_calender", self.mock_emit):
+                    response = app.mod_event(
+                        test_case[KEY_INPUT],
+                        test_case[KEY_INPUT2],
+                        test_case[KEY_INPUT3],
+                        test_case[KEY_INPUT4],
+                        test_case[KEY_INPUT5],
+                        test_case[KEY_INPUT6],
+                        )
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
+    def test_emit_all_ccode(self):
+        """
+        Success cases for emitting all history.
+        """
+        for test_case in self.success_test_params_emit:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                with mock.patch("app.get_sid", self.mock_sid):
+                    response = app.emit_ccode_to_calender(
+                        test_case[KEY_INPUT], test_case[KEY_INPUT2]
+                    )
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
+    def test_on_delete_event(self):
+        for test_case in self.success_test_params_on_delete_event:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                with mock.patch("app.emit_events_to_calender",self.mock_emit):
+                    response=app.on_delete_event(test_case[KEY_INPUT])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
+    def test_socket_on_mod_event(self):
+        """
+        Success cases for push_new_user_to_db.
+        """
+        for test_case in self.success_test_params_on_mod_event_socket:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                with mock.patch("app.emit_events_to_calender", self.mock_emit):
+                    response = app.on_modify_event(test_case[KEY_INPUT])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
 
-    def setUp(self):
+    def test_socket_on_merge_calendar(self):
         """
-        Sets up parameters for dad cases.
+        Success cases for push_new_user_to_db.
         """
-        self.success_test_params_google = [
-            {
-                KEY_INPUT: {
-                    "name": "Koomi",
-                    "email": "baconatoring@gmail.com",
-                    "idtoken": "good_mock_token",
-                },
-                KEY_EXPECTED: "mock_id",
-            }
-        ]
-        self.failure_test_params_google = [
-            {
-                KEY_INPUT: {
-                    "name": "Koomi",
-                    "email": "baconatoring@gmail.com",
-                    "idtoken": "bad_mock_token",
-                },
-                KEY_EXPECTED: "Unverified.",
-            },
-            {
-                KEY_INPUT: {
-                    "name": "Koomi",
-                    "email": "baconatoring@gmail.com",
-                    "idtoken": "vvmock_token",
-                },
-                KEY_EXPECTED: "Unverified.",
-            },
-        ]
-        self.sucess_test_params_check_id = [
-            {
-                KEY_INPUT:{
-                    "check_id": "1",
-                },
-                KEY_EXPECTED:True,
-            },]
+        for test_case in self.success_test_params_on_merge_cal:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                with mock.patch("app.emit_events_to_calender", self.mock_emit):
+
+                    response = app.on_merge_calendar(test_case[KEY_INPUT])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
+
+    def test_socket_on_import_cal(self):
+        """
+        Success cases for push_new_user_to_db.
+        """
+        for test_case in self.success_test_params_on_import:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                with mock.patch("app.socketio.emit", self.mock_emit):
+
+                    response = app.on_import_calendar(test_case[KEY_INPUT])
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
+
+# class GoogleLoginTestCase(unittest.TestCase):
+#     """
+#     Sets up test cases Google Oauth.
+#     """
+
+#     def setUp(self):
+#         """
+#         Sets up parameters for dad cases.
+#         """
+#         self.success_test_params_google = [
+#             {
+#                 KEY_INPUT: {
+#                     "name": "Koomi",
+#                     "email": "baconatoring@gmail.com",
+#                     "idtoken": "good_mock_token",
+#                 },
+#                 KEY_EXPECTED: "mock_id",
+#             }
+#         ]
+#         self.failure_test_params_google = [
+#             {
+#                 KEY_INPUT: {
+#                     "name": "Koomi",
+#                     "email": "baconatoring@gmail.com",
+#                     "idtoken": "bad_mock_token",
+#                 },
+#                 KEY_EXPECTED: "Unverified.",
+#             },
+#             {
+#                 KEY_INPUT: {
+#                     "name": "Koomi",
+#                     "email": "baconatoring@gmail.com",
+#                     "idtoken": "vvmock_token",
+#                 },
+#                 KEY_EXPECTED: "Unverified.",
+#             },
+#         ]
+#         self.sucess_test_params_check_id = [
+#             {
+#                 KEY_INPUT:{
+#                     "check_id": "1",
+#                 },
+#                 KEY_EXPECTED:True,
+#             },]
 
     def mocked_exists(self, userid):
         """"Mocked out to make sure the user exists in the database"""
