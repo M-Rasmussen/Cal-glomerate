@@ -5,6 +5,7 @@ import { Socket } from './Socket';
 import './loginstyle.css';
 import { Cal_comp } from './CalenderComp.jsx';
 import { HomePage } from './LogedInHome';
+import { Stack } from 'office-ui-fabric-react';
 
 export default function Login() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -18,15 +19,14 @@ export default function Login() {
     const email = response.getBasicProfile().getEmail();
     const idToken = response.getAuthResponse().id_token;
     const access_token = response.getAuthResponse().access_token;
-    console.log("AUTH TOKEN IS:" + access_token);
+    console.log('AUTH TOKEN IS:' + access_token);
     Socket.emit('new google user', {
       name: name,
       email: email,
       idtoken: idToken,
-      access_token: access_token
+      access_token: 'access_token'
     });
   }
-
 
   function loginUserFail() {
     return false;
@@ -59,6 +59,14 @@ export default function Login() {
   return (
     <div className="outermost">
       <h1 className="header">Calglomerate</h1>
+      <Stack>
+        <h2>Have you ever wanted to find a time to meet with your friends?</h2>
+        <h3>
+          Does having multiple accounts with calendars ever make it difficult to
+          stay organized?
+        </h3>
+        <h1>Calglomerate is here to help!</h1>
+      </Stack>
       <div className="container">
         <GoogleLogin
           clientId="658056760445-ejq8q635n1948vqieqf95vsa6c6e1fvp.apps.googleusercontent.com"
