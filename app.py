@@ -446,11 +446,14 @@ def on_import_calendar(data):
             continue
         start = int(rfc3339_to_unix(str(event["start"].get("dateTime"))))
         end = int(rfc3339_to_unix(str(event["end"].get("dateTime"))))
-        title = (
-            (event["summary"][:117] + "..")
-            if len(event["summary"]) > 117
-            else event["summary"]
-        )
+        try:
+            title = (
+                (event["summary"][:117] + "..")
+                if len(event["summary"]) > 117
+                else event["summary"]
+            )
+        except KeyError:
+            event["summary"] = "No Title"
         try:
             desc = (
                 (event["description"][:117] + "..")
