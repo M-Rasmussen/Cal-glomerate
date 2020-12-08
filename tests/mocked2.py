@@ -259,16 +259,16 @@ class SQLQueryTestCase(unittest.TestCase):
                 (test_case[KEY_INPUT], test_case[KEY_INPUT2], test_case[KEY_INPUT3])
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
-    def test_emit_all_history(self):
-        '''
-        Success cases for emitting all history.
-        '''
-        for test_case in self.success_test_params:
-            with mock.patch('app.db', AlchemyMagicMock()):
-                with mock.patch('app.socketio.emit', self.mock_emit):
-                    response = app.emit_all_history(test_case[KEY_INPUT])
-            expected = test_case[KEY_EXPECTED]
-            self.assertEqual(response, expected)
+    # def test_emit_all_history(self):
+    #     '''
+    #     Success cases for emitting all history.
+    #     '''
+    #     for test_case in self.success_test_params:
+    #         with mock.patch('app.db', AlchemyMagicMock()):
+    #             with mock.patch('app.socketio.emit', self.mock_emit):
+    #                 response = app.emit_all_history(test_case[KEY_INPUT])
+    #         expected = test_case[KEY_EXPECTED]
+    #         self.assertEqual(response, expected)
 # class GoogleLoginTestCase(unittest.TestCase):
 #     '''
 #     Sets up test cases Google Oauth.

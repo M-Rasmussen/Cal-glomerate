@@ -93,7 +93,6 @@ def del_event(event_id, ccode):
     """
     db.session.query(models.Event).filter(models.Event.id == event_id).delete()
     db.session.commit()
-    return event_id
 
 
 def delete_cal(ccode):
@@ -118,8 +117,7 @@ def get_sid():
     """
     returns sid.
     """
-    sid = flask.request.sid
-    return sid
+    return flask.request.sid
 
 
 def emit_events_to_calender(channel, cal_code):
@@ -144,8 +142,8 @@ def emit_events_to_calender(channel, cal_code):
         all_events.extend(eventsForCcode)
 
     all_events = list(unique_everseen(all_events))
-    for event in all_events:
-        print(event)
+    # for event in all_events:
+    #     print(event)
     socketio.emit(channel, all_events, room=sid)
 
 
@@ -176,6 +174,20 @@ def emit_ccode_to_calender(channel, ccodes):
     if len(ccodeDetails) > 0:
         socketio.emit(channel, ccodeDetails, room=sid)
 
+def exists_in_auth_user(check_id):
+    """
+    Check to see if the auth user is there
+    """
+    return (db.session.query(models.AuthUser.userid).filter_by(userid=check_id).scalar() is not None)
+
+
+def exists_in_calender(merge_code):
+    """
+    Check to see if merge calendar exists
+    """
+    return (db.session.query(models.Calendars.ccode).filter_by(ccode=merge_code).scalar() is not None)
+    
+
 
 ##SOCKET EVENTS
 @socketio.on("connect")
@@ -183,7 +195,7 @@ def on_connect():
     """
     Runs on connect.
     """
-    print("Someone connected!")
+    # print("Someone connected!")
 
 
 @socketio.on("disconnect")
@@ -191,7 +203,7 @@ def on_disconnect():
     """
     Runs on disconnect.
     """
-    print("Someone disconnected!")
+    # print("Someone disconnected!")
 
 
 @socketio.on("new google user")
@@ -209,10 +221,7 @@ def on_new_google_user(data):
         )
         userid = idinfo["sub"]
         print("Verified user. Proceeding to check database.")
-        exists = (
-            db.session.query(models.AuthUser.userid).filter_by(userid=userid).scalar()
-            is not None
-        )
+        exists = exists_in_auth_user(userid)
         if not exists:
             push_new_user_to_db(userid, data["name"], data["email"])
             add_calendar_for_user(userid, False)
@@ -233,8 +242,8 @@ def on_new_google_user(data):
             room=sid,
         )
         #
-        print("printing all CCODES")
-        print(all_ccodes)
+        # print("printing all CCODES")
+        # print(all_ccodes)
         #
         return userid
     except ValueError:
@@ -251,8 +260,7 @@ def on_delete_cal(data):
     """
     add a new event for to calendar
     """
-    ccode = data["ccode"]
-    delete_cal(ccode)
+    delete_cal(data["ccode"])
 
 
 @socketio.on("add calendar")
@@ -275,9 +283,7 @@ def on_add_calendar(data):
         " Private flag: ",
         private,
     )
-    time = datetime.strftime(datetime.utcnow(), "%s")
-    print(time)
-    addedEventId = add_event([ccode], "Created Calendar At", time, time, "some words")
+    addedEventId = add_event([ccode], "Created Calendar At", 946688461, 946688461, "some words")
     print(addedEventId)
     ccode_list.append(ccode)
     emit_events_to_calender("recieve all events", ccode_list)
@@ -294,8 +300,6 @@ def on_add_calendar(data):
 def send_events_to_calendar(data):
     print("LOOKING FOR CALCODE: ", data)
     # EMIT EVENTS TO CALENDAR
-    print("get events socket")
-    print(type(data))
     emit_events_to_calender("recieve all events", data)
     print("SENT EVENTS!")
 
@@ -367,11 +371,9 @@ def on_delete_event(data):
     event_id = data["event_id"]
     ccode = data["ccode"]
     ccode_list = data["ccode_list"]
-    deleteid = del_event(event_id, [ccode])
-    print(deleteid)
+    del_event(event_id, [ccode])
     # EMIT EVENTS TO CALENDAR
     print("emit form delete event")
-    print(type(ccode_list))
     emit_events_to_calender("recieve all events", ccode_list)
 
 
@@ -381,9 +383,7 @@ def on_merge_calendar(data):
     merge_code = int(data["userToMergeWith"])
     print("LOOKING FOR CALCODE", data["userToMergeWith"])
     cal_code = int(data["currentUser"])
-    checkExists = db.session.query(models.Calendars).filter_by(ccode=merge_code).first()
-    print(checkExists)
-    exists = checkExists is not None and not checkExists.private
+    exists = exists_in_calender(merge_code)
     try:
         if not exists:
             raise ValueError
@@ -395,15 +395,6 @@ def on_merge_calendar(data):
             if cal_code not in record.ccode:
                 record.ccode.append(cal_code)
                 db.session.commit()
-
-        # emit events to calendar
-        #
-        print("Merge Calendar")
-        print("ccode List")
-        print(ccode_list)
-
-        print("cal_code")
-        print(cal_code)
 
         print("cal_code appended")
         ccode_list.append(merge_code)
