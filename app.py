@@ -213,13 +213,6 @@ def on_new_google_user(data):
     print("Beginning to authenticate data: ", data)
     sid = get_sid()
     try:
-        # idinfo = id_token.verify_oauth2_token(
-        #     data["idtoken"],
-        #     requests.Request(),
-        #     "658056760445-ejq8q635n1948vqieqf95vsa6c6e1fvp.apps.googleusercontent.com",
-        # )
-        # userid = idinfo["sub"]
-        # print("TESTING PURPOSES: ", idinfo["name"], idinfo["email"])
         credentials = client.credentials_from_clientsecrets_and_code(CLIENT_SECRET_FILE,["https://www.googleapis.com/auth/calendar.readonly", 'profile', 'email'], data['code'])
         print("Verified user. Proceeding to check database.")
         userid = credentials.id_token['sub']
