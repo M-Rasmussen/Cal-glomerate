@@ -18,23 +18,19 @@ import {
 } from 'office-ui-fabric-react';
 
 export function Cal_comp({ ccode, eventsToShow }) {
+  console.log('skjdnf');
+  console.log(eventsToShow);
   const localizer = momentLocalizer(moment);
   const [modal, setModal] = React.useState(false);
-  const [modstartTime, modsetStartTime] = React.useState("11:00");
-  const [modendTime, modsetEndTime] = React.useState("14:00");
+  const [modstartTime, modsetStartTime] = React.useState('11:00');
+  const [modendTime, modsetEndTime] = React.useState('14:00');
   const [modtitle, modsetTitle] = React.useState('Title');
   const [modselectedDate, modsetSelectedDate] = useState(new Date());
   const [modEventId, modSetEventId] = useState(0);
   const [modEventCCode, modSetEventCCode] = useState(0);
 
-  
   const handleSubmit = (event) => {
     event.preventDefault();
-    // console.log(modtitle);
-    // console.log(modselectedDate);
-    // console.log(modstartTime);
-    // console.log(modendTime);
-    // console.log(modEventId);
     const start = moment(
       modselectedDate.toISOString().split('T')[0] + ' ' + modstartTime
     ).format('X');
@@ -52,14 +48,18 @@ export function Cal_comp({ ccode, eventsToShow }) {
     });
     setModal(false);
   };
-  function modEventTime(event){
-  let unformattedStart= new Date(event.start).toLocaleTimeString('en-US', { hour12: false });
-  let formattedStart = unformattedStart.slice(0,5);
-  modsetStartTime(formattedStart);
+  function modEventTime(event) {
+    let unformattedStart = new Date(event.start).toLocaleTimeString('en-US', {
+      hour12: false
+    });
+    let formattedStart = unformattedStart.slice(0, 5);
+    modsetStartTime(formattedStart);
 
-  let unformattedEnd= new Date(event.end).toLocaleTimeString('en-US', { hour12: false });
-  let formattedEnd = unformattedEnd.slice(0,5);
-  modsetEndTime(formattedEnd);
+    let unformattedEnd = new Date(event.end).toLocaleTimeString('en-US', {
+      hour12: false
+    });
+    let formattedEnd = unformattedEnd.slice(0, 5);
+    modsetEndTime(formattedEnd);
   }
   const handleDelete = (event) => {
     event.preventDefault();
@@ -68,17 +68,15 @@ export function Cal_comp({ ccode, eventsToShow }) {
     console.log(modstartTime);
     console.log(modendTime);
     console.log(modEventId);
-    
+
     Socket.emit('delete event', {
-      
       ccode: modEventCCode,
       event_id: modEventId,
       ccode_list: ccode
-
     });
     setModal(false);
   };
-  console.log("Cal_COMP CCODES");
+  console.log('Cal_COMP CCODES');
   console.log(ccode);
   return (
     <div style={{ height: '100%' }}>
@@ -127,7 +125,6 @@ export function Cal_comp({ ccode, eventsToShow }) {
         }}
       >
         {' '}
-        
         <form onSubmit={handleSubmit}>
           <Stack tokens={{ childrenGap: 10, padding: 20 }}>
             <h1>{modtitle}</h1>
@@ -156,7 +153,6 @@ export function Cal_comp({ ccode, eventsToShow }) {
             </Stack.Item>
 
             <DefaultButton onClick={handleSubmit}>Send</DefaultButton>
-            
           </Stack>
         </form>
         <DefaultButton onClick={handleDelete}>Delete </DefaultButton>

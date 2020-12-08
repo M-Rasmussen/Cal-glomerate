@@ -13,45 +13,35 @@ import { CalendarSelector } from './CalendarSelector';
 export function HomePage({ ccode, userId, access_token }) {
   const [events, setEvents] = React.useState([]);
   const [eventsToShow, setEventsToShow] = React.useState([]);
-  console.log(events);
-  console.log('all of ccodes');
-  console.log(ccode);
   React.useEffect(() => {
     Socket.emit('get events', ccode);
     Socket.on('recieve all events', (data) => {
-      console.log('here');
-      console.log(data);
-      setEvents(
-        data.map((event) => {
-          let intstart = parseInt(event['start']);
-          let start = new Date(intstart * 1000);
-          let intend = parseInt(event['end']);
-          let end = new Date(intend * 1000);
-          let title = event['title'];
-          let event_id = event['eventid'];
-          console.log(event_id);
+      const newEvents = data.map((event) => {
+        let intstart = parseInt(event['start']);
+        let start = new Date(intstart * 1000);
+        let intend = parseInt(event['end']);
+        let end = new Date(intend * 1000);
+        let title = event['title'];
+        let event_id = event['eventid'];
+        console.log(event_id);
 
-          const ccode = event['ccode'];
-          return {
-            start,
-            end,
-            title,
-            event_id,
-            ccode
-          };
-        })
-      );
-      setEventsToShow(events);
+        const ccode = event['ccode'];
+        return {
+          start,
+          end,
+          title,
+          event_id,
+          ccode
+        };
+      });
+      setEvents(newEvents);
+      setEventsToShow(newEvents);
     });
   }, []);
 
   function new_Event() {
     React.useEffect(() => {
       Socket.on('calender_event', (data) => {
-        console.log(data);
-        console.log('title ' + data['title']);
-        console.log('start: ' + data['start']);
-        console.log('end: ' + data['end']);
         let intstart = parseInt(data['start']);
         let start = new Date(intstart * 1000);
         let intend = parseInt(data['end']);
@@ -60,12 +50,6 @@ export function HomePage({ ccode, userId, access_token }) {
         let title = data['title'];
         let event_id = data['eventid'];
         let ccode = data['ccode'];
-
-        console.log('CONSOLE CCODE');
-        console.log(ccode);
-
-        console.log(event_id);
-        console.log('ADDING NEW INDIVIDUAL EVENT');
         setEventsToShow([...events, { start, end, title, event_id, ccode }]);
         setEvents((prevEvents) => [
           ...prevEvents,
