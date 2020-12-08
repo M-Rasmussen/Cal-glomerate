@@ -59,12 +59,19 @@ export function CalendarSelector({ events, setEventsToShow, userId }) {
     event.preventDefault();
     console.log(calTitle);
     console.log('Current user:' + currUser);
-    Socket.emit('modify calendar', {
+    console.log(ccodeDetails);
+    const isPrivate =
+      (ccodeDetails[calTitle].hasOwnProperty('privateCal') &&
+        ccodeDetails[calTitle].privateCal) ||
+      ccodeDetails[calTitle];
+    const data = {
       ccode: calTitle,
       userid: currUser,
-      privateCal: ccodeDetails[calTitle].private,
+      privateCal: isPrivate,
       deleteCal: deleteCal
-    });
+    };
+    console.log(data);
+    Socket.emit('modify calendar', data);
     console.log('Emitted!');
     setModal(false);
   };
@@ -145,7 +152,7 @@ export function CalendarSelector({ events, setEventsToShow, userId }) {
             <Checkbox
               label="Toggle to Delete Calendar"
               onChange={() => {
-                setDeleteCal(!priv);
+                setDeleteCal(!deleteCal);
               }}
             />
             <DefaultButton onClick={handleSubmit}>
