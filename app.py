@@ -22,8 +22,7 @@ from googleapiclient.discovery import build
 
 API_NAME = "calendar"
 API_VERSION = "v3"
-SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
-CLIENT_SECRET_FILE = "credentials.json"
+CLIENT_SECRET_FILE = "./credentials.json"
 from iteration_utilities import unique_everseen
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
@@ -214,16 +213,14 @@ def on_new_google_user(data):
     print("Beginning to authenticate data: ", data)
     sid = get_sid()
     try:
-        idinfo = id_token.verify_oauth2_token(
-            data["idtoken"],
-            requests.Request(),
-            "658056760445-ejq8q635n1948vqieqf95vsa6c6e1fvp.apps.googleusercontent.com",
-        )
-        userid = idinfo["sub"]
+        credentials = client.credentials_from_clientsecrets_and_code(CLIENT_SECRET_FILE,["https://www.googleapis.com/auth/calendar.readonly", 'profile', 'email'], data['code'])
         print("Verified user. Proceeding to check database.")
+        userid = credentials.id_token['sub']
+        email = credentials.id_token['email']
+        name = credentials.id_token['name']
         exists = exists_in_auth_user(userid)
         if not exists:
-            push_new_user_to_db(userid, data["name"], data["email"])
+            push_new_user_to_db(userid, name, email)
             add_calendar_for_user(userid, False)
         all_ccodes = [
             record.ccode
@@ -234,10 +231,10 @@ def on_new_google_user(data):
         socketio.emit(
             "Verified",
             {
-                "name": data["name"],
+                "name": name,
                 "ccodes": all_ccodes,
                 "userid": userid,
-                "access_token": data["access_token"],
+                "access_token": credentials.access_token,
             },
             room=sid,
         )
