@@ -15,16 +15,8 @@ export default function Login() {
   const [token, setToken] = useState('');
 
   function loginUser(response) {
-    const name = response.getBasicProfile().getName();
-    const email = response.getBasicProfile().getEmail();
-    const idToken = response.getAuthResponse().id_token;
-    const access_token = response.getAuthResponse().access_token;
-    console.log('AUTH TOKEN IS:' + access_token);
     Socket.emit('new google user', {
-      name: name,
-      email: email,
-      idtoken: idToken,
-      access_token: 'access_token'
+      code: response['code']
     });
   }
 
@@ -74,6 +66,8 @@ export default function Login() {
           buttonText="Login"
           onSuccess={loginUser}
           onFailure={loginUserFail}
+          accessType="offline"
+          responseType="code"
           cookiePolicy="single_host_origin"
         />
       </div>
