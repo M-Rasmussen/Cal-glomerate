@@ -95,9 +95,11 @@ def del_event(event_id, ccode):
 
 
 def delete_cal(ccode):
-
+    print("Deleting all events!")
+    print(":GOT HERE GOT HERE GOT HERE GOT HERE")
+    for record in db.session.query(models.Event).filter(models.Event.ccode.contains(ccode)).all():
+        print(record)
     db.session.query(models.Calendars).filter(models.Calendars.ccode == ccode).delete()
-    db.session.query(models.Event).filter(models.Event.ccode == [ccode]).delete()
     db.session.commit()
 
 
@@ -257,6 +259,7 @@ def on_delete_cal(data):
     """
     add a new event for to calendar
     """
+    print("not updating?")
     delete_cal(data["ccode"])
 
 
@@ -471,7 +474,7 @@ def on_modify_calendar(data):
     private = data["privateCal"]
     userid = data["userid"]
     deleteCal = data["deleteCal"]
-
+    print(ccode)
     calendar = (
         db.session.query(models.Calendars)
         .filter(models.Calendars.ccode == ccode)
@@ -479,6 +482,9 @@ def on_modify_calendar(data):
     )
     if calendar:
         if deleteCal == True:
+            for record in db.session.query(models.Event).filter(models.Event.ccode.contains([ccode])).all():
+                if record.ccode[0] == ccode:
+                    del_event(record.id, ccode)
             db.session.query(models.Calendars).filter(
                 models.Calendars.ccode == ccode
             ).delete()
@@ -487,8 +493,6 @@ def on_modify_calendar(data):
         elif private == False:
             calendar.private = False
         db.session.commit()
-
-
 @app.route("/")
 def hello():
     """
