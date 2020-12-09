@@ -97,7 +97,9 @@ def del_event(event_id, ccode):
 def delete_cal(ccode):
     print("Deleting all events!")
     print(":GOT HERE GOT HERE GOT HERE GOT HERE")
-    for record in db.session.query(models.Event).filter(models.Event.ccode.contains(ccode)).all():
+    for record in (
+        db.session.query(models.Event).filter(models.Event.ccode.contains(ccode)).all()
+    ):
         print(record)
     db.session.query(models.Calendars).filter(models.Calendars.ccode == ccode).delete()
     db.session.commit()
@@ -175,19 +177,25 @@ def emit_ccode_to_calender(channel, ccodes):
     if len(ccodeDetails) > 0:
         socketio.emit(channel, ccodeDetails, room=sid)
 
+
 def exists_in_auth_user(check_id):
     """
     Check to see if the auth user is there
     """
-    return (db.session.query(models.AuthUser.userid).filter_by(userid=check_id).scalar() is not None)
+    return (
+        db.session.query(models.AuthUser.userid).filter_by(userid=check_id).scalar()
+        is not None
+    )
 
 
 def exists_in_calender(merge_code):
     """
     Check to see if merge calendar exists
     """
-    return (db.session.query(models.Calendars.ccode).filter_by(ccode=merge_code).scalar() is not None)
-    
+    return (
+        db.session.query(models.Calendars.ccode).filter_by(ccode=merge_code).scalar()
+        is not None
+    )
 
 
 ##SOCKET EVENTS
@@ -215,11 +223,15 @@ def on_new_google_user(data):
     print("Beginning to authenticate data: ", data)
     sid = get_sid()
     try:
-        credentials = client.credentials_from_clientsecrets_and_code(CLIENT_SECRET_FILE,["https://www.googleapis.com/auth/calendar.readonly", 'profile', 'email'], data['code'])
+        credentials = client.credentials_from_clientsecrets_and_code(
+            CLIENT_SECRET_FILE,
+            ["https://www.googleapis.com/auth/calendar.readonly", "profile", "email"],
+            data["code"],
+        )
         print("Verified user. Proceeding to check database.")
-        userid = credentials.id_token['sub']
-        email = credentials.id_token['email']
-        name = credentials.id_token['name']
+        userid = credentials.id_token["sub"]
+        email = credentials.id_token["email"]
+        name = credentials.id_token["name"]
         exists = exists_in_auth_user(userid)
         if not exists:
             push_new_user_to_db(userid, name, email)
@@ -283,7 +295,9 @@ def on_add_calendar(data):
         " Private flag: ",
         private,
     )
-    addedEventId = add_event([ccode], "Created Calendar At", 946688461, 946688461, "some words")
+    addedEventId = add_event(
+        [ccode], "Created Calendar At", 946688461, 946688461, "some words"
+    )
     print(addedEventId)
     ccode_list.append(ccode)
     emit_events_to_calender("recieve all events", ccode_list)
@@ -474,6 +488,8 @@ def on_modify_calendar(data):
     private = data["privateCal"]
     userid = data["userid"]
     deleteCal = data["deleteCal"]
+    allCcodes = data["allCcodes"]
+
     print(ccode)
     calendar = (
         db.session.query(models.Calendars)
@@ -482,7 +498,11 @@ def on_modify_calendar(data):
     )
     if calendar:
         if deleteCal == True:
-            for record in db.session.query(models.Event).filter(models.Event.ccode.contains([ccode])).all():
+            for record in (
+                db.session.query(models.Event)
+                .filter(models.Event.ccode.contains([ccode]))
+                .all()
+            ):
                 if record.ccode[0] == ccode:
                     del_event(record.id, ccode)
             db.session.query(models.Calendars).filter(
@@ -493,6 +513,9 @@ def on_modify_calendar(data):
         elif private == False:
             calendar.private = False
         db.session.commit()
+        emit_events_to_calender("recieve all events", allCcodes)
+
+
 @app.route("/")
 def hello():
     """

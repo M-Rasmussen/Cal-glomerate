@@ -63,11 +63,6 @@ export function Cal_comp({ ccode, eventsToShow }) {
   }
   const handleDelete = (event) => {
     event.preventDefault();
-    console.log(modtitle);
-    console.log(modselectedDate);
-    console.log(modstartTime);
-    console.log(modendTime);
-    console.log(modEventId);
 
     Socket.emit('delete event', {
       ccode: modEventCCode,
@@ -76,8 +71,6 @@ export function Cal_comp({ ccode, eventsToShow }) {
     });
     setModal(false);
   };
-  console.log('Cal_COMP CCODES');
-  console.log(ccode);
   return (
     <div style={{ height: '100%' }}>
       <Calendar
