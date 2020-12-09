@@ -37,6 +37,7 @@ export function CalendarSelector({ events, setEventsToShow, userId }) {
     Socket.on('recieve ccode details', (newCcodeDetails) => {
       console.log(newCcodeDetails);
       setCcodeDetails(newCcodeDetails);
+      setDeleteCal(false);
     });
   }, [events]);
 
@@ -68,7 +69,8 @@ export function CalendarSelector({ events, setEventsToShow, userId }) {
       ccode: calTitle,
       userid: currUser,
       privateCal: isPrivate,
-      deleteCal: deleteCal
+      deleteCal: deleteCal,
+      allCcodes: ccodes
     };
     console.log(data);
     Socket.emit('modify calendar', data);

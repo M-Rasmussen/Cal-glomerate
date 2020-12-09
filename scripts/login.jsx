@@ -40,7 +40,10 @@ export default function Login() {
 
   if (loggedIn && ccode[0] != -1) {
     return (
-      <div className="outermost">
+      <div
+        className="outermost"
+        style={{ backgroundColor: 'azure', height: '100%' }}
+      >
         <h1 className="header">Calglomerate</h1>
         <div className="container">
           <HomePage ccode={ccode} userId={userId} access_token={token} />
@@ -53,12 +56,13 @@ export default function Login() {
       verticalAlign="start"
       horizontalAlign="center"
       tokens={{ childrenGap: 10, padding: 20 }}
+      style={{ backgroundColor: 'azure' }}
     >
       <Stack
         horizontal
         horizontalAlign="center"
         verticalAlign="center"
-        style={{ borderBottom: '2px solid black', width: '100%' }}
+        style={{ color: 'blue' }}
       >
         <Image
           src="/static/logo.png"
@@ -68,9 +72,14 @@ export default function Login() {
         />
         <h1>Calglomerate</h1>
       </Stack>
-      <Stack style={{ width: '75%' }}>
+      <Stack>
         <Stack.Item>
-          <Stack horizontal horizontalAlign="start" verticalAlign="center">
+          <Stack
+            horizontal
+            horizontalAlign="center"
+            verticalAlign="center"
+            style={{ border: '2px solid blue', backgroundColor: 'azure' }}
+          >
             <h2>
               Have you ever wanted to find a time to meet with your friends?
             </h2>
@@ -84,7 +93,7 @@ export default function Login() {
         </Stack.Item>
 
         <Stack.Item>
-          <Stack horizontal horizontalAlign="end" verticalAlign="center">
+          <Stack horizontal horizontalAlign="center" verticalAlign="center">
             <Image
               src="/static/logo.png"
               imageFit={ImageFit.contain}
