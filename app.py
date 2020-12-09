@@ -12,12 +12,7 @@ import flask
 import flask_socketio
 import flask_sqlalchemy
 import iso8601
-import pytz
-from google.oauth2 import id_token
-from google.auth.transport import requests
-from datetime import datetime
 from oauth2client import client
-import httplib2
 from googleapiclient.discovery import build
 
 API_NAME = "calendar"
@@ -130,7 +125,7 @@ def emit_events_to_calender(channel, cal_code):
     sid = get_sid()
     all_events = []
     for ccode in cal_code:
-        eventsForCcode = [
+        events_for_ccode = [
             {
                 "start": record.start,
                 "end": record.end,
@@ -142,7 +137,7 @@ def emit_events_to_calender(channel, cal_code):
             .filter(models.Event.ccode.contains([ccode]))
             .all()
         ]
-        all_events.extend(eventsForCcode)
+        all_events.extend(events_for_ccode)
 
     all_events = list(unique_everseen(all_events))
     # for event in all_events:
@@ -151,6 +146,9 @@ def emit_events_to_calender(channel, cal_code):
 
 
 def rfc3339_to_unix(timestamp):
+    """
+    Convert to unix time.
+    """
     _date_obj = iso8601.parse_date(timestamp)
     _date_unix = _date_obj.timestamp()
     return _date_unix
@@ -161,21 +159,21 @@ def emit_ccode_to_calender(channel, ccodes):
     emits details about a ccode
     """
     sid = get_sid()
-    ccodeDetails = {}
+    ccode_details = {}
     for ccode in ccodes:
         record = (
             db.session.query(models.Calendars)
             .filter(models.Calendars.ccode == ccode)
             .first()
         )
-        detailsForCcode = {
+        details_for_ccode = {
             "userid": record.userid,
             "private": record.private,
         }
-        ccodeDetails[record.ccode] = detailsForCcode
+        ccode_details[record.ccode] = details_for_ccode
 
-    if len(ccodeDetails) > 0:
-        socketio.emit(channel, ccodeDetails, room=sid)
+    if len(ccode_details) > 0:
+        socketio.emit(channel, ccode_details, room=sid)
 
 
 def exists_in_auth_user(check_id):
@@ -295,10 +293,10 @@ def on_add_calendar(data):
         " Private flag: ",
         private,
     )
-    addedEventId = add_event(
+    added_event_id = add_event(
         [ccode], "Created Calendar At", 946688461, 946688461, "some words"
     )
-    print(addedEventId)
+    print(added_event_id)
     ccode_list.append(ccode)
     emit_events_to_calender("recieve all events", ccode_list)
 
@@ -312,6 +310,9 @@ def on_add_calendar(data):
 
 @socketio.on("get events")
 def send_events_to_calendar(data):
+    """
+    send_events_to_calendar.
+    """
     print("LOOKING FOR CALCODE: ", data)
     # EMIT EVENTS TO CALENDAR
     emit_events_to_calender("recieve all events", data)
@@ -320,6 +321,9 @@ def send_events_to_calendar(data):
 
 @socketio.on("get ccode details")
 def send_ccode_to_calendar(data):
+    """
+    send_ccode_to_calendar.
+    """
     print("getting details for ccode: ", data)
     emit_ccode_to_calender("recieve ccode details", data)
     print("SENT ccode!")
@@ -332,13 +336,12 @@ def on_new_event(data):
     """
     print(data)
     title = data["title"]
-    date = data["date"]
     start = data["start"]
     end = data["end"]
     ccode = data["ccode"]
     print(start)
     print(end)
-    addedEventId = add_event([ccode], title, start, end, "some words")
+    added_event_id = add_event([ccode], title, start, end, "some words")
     print("SENDING INDIVIDUAL EVENT")
     socketio.emit(
         "calender_event",
@@ -346,12 +349,12 @@ def on_new_event(data):
             "title": title,
             "start": start,
             "end": end,
-            "eventid": addedEventId,
+            "eventid": added_event_id,
             "ccode": [ccode],
         },
         room=get_sid(),
     )
-    return addedEventId
+    return added_event_id
 
 
 @socketio.on("modify event")
@@ -393,6 +396,9 @@ def on_delete_event(data):
 
 @socketio.on("cCodeToMerge")
 def on_merge_calendar(data):
+    """
+    merge calendar
+    """
     ccode_list = data["ccode_list"]
     merge_code = int(data["userToMergeWith"])
     print("LOOKING FOR CALCODE", data["userToMergeWith"])
@@ -445,8 +451,8 @@ def on_import_calendar(data):
     ccode_list.append(ccode)
     for event in events:
         if (
-            event["start"].get("dateTime") == None
-            or event["end"].get("dateTime") == None
+            event["start"].get("dateTime") is None
+            or event["end"].get("dateTime") is None
         ):
             continue
         start = int(rfc3339_to_unix(str(event["start"].get("dateTime"))))
@@ -486,9 +492,8 @@ def on_modify_calendar(data):
     print(data)
     ccode = data["ccode"]
     private = data["privateCal"]
-    userid = data["userid"]
-    deleteCal = data["deleteCal"]
-    allCcodes = data["allCcodes"]
+    delete_cal = data["deleteCal"]
+    all_ccodes = data["allCcodes"]
 
     print(ccode)
     calendar = (
@@ -497,7 +502,7 @@ def on_modify_calendar(data):
         .first()
     )
     if calendar:
-        if deleteCal == True:
+        if delete_cal:
             for record in (
                 db.session.query(models.Event)
                 .filter(models.Event.ccode.contains([ccode]))
@@ -508,12 +513,12 @@ def on_modify_calendar(data):
             db.session.query(models.Calendars).filter(
                 models.Calendars.ccode == ccode
             ).delete()
-        elif private == True:
+        elif private:
             calendar.private = True
-        elif private == False:
+        elif private:
             calendar.private = False
         db.session.commit()
-        emit_events_to_calender("recieve all events", allCcodes)
+        emit_events_to_calender("recieve all events", all_ccodes)
 
 
 @app.route("/")
