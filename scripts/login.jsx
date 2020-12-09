@@ -44,7 +44,23 @@ export default function Login() {
         className="outermost"
         style={{ backgroundColor: 'azure', height: '100%' }}
       >
-        <h1 className="header">Calglomerate</h1>
+        <Stack
+          horizontal
+          horizontalAlign="center"
+          verticalAlign="center"
+          style={{ color: 'blue' }}
+        >
+          <Image
+            src="/static/logo.png"
+            imageFit={ImageFit.contain}
+            width={100}
+            height={100}
+          />
+          <h1 style={{ textShadow: '0 0 3px #FFFFFF, 0 0 5px #0000FF' }}>
+            Calglomerate
+          </h1>
+        </Stack>
+        <div className="header"></div>
         <div className="container">
           <HomePage ccode={ccode} userId={userId} access_token={token} />
         </div>
@@ -56,7 +72,7 @@ export default function Login() {
       verticalAlign="start"
       horizontalAlign="center"
       tokens={{ childrenGap: 10, padding: 20 }}
-      style={{ backgroundColor: 'azure' }}
+      style={{ backgroundColor: 'azure', height: '100%' }}
     >
       <Stack
         horizontal
@@ -70,35 +86,52 @@ export default function Login() {
           width={100}
           height={100}
         />
-        <h1>Calglomerate</h1>
+        <h1 style={{ textShadow: '0 0 3px #FFFFFF, 0 0 5px #0000FF' }}>
+          Calglomerate
+        </h1>
       </Stack>
-      <Stack>
+
+      <div className="header" style={{ width: '100vw' }}></div>
+      <Stack tokens={{ childrenGap: 10, padding: 20 }}>
         <Stack.Item>
           <Stack
             horizontal
             horizontalAlign="center"
             verticalAlign="center"
-            style={{ border: '2px solid blue', backgroundColor: 'azure' }}
+            style={{
+              border: '5px solid blue',
+              borderRadius: '2%',
+              backgroundColor: 'lightblue'
+            }}
           >
             <h2>
               Have you ever wanted to find a time to meet with your friends?
             </h2>
             <Image
-              src="/static/logo.png"
+              src="/static/friends.png"
               imageFit={ImageFit.contain}
-              width={150}
-              height={150}
+              width={125}
+              height={125}
             />
           </Stack>
         </Stack.Item>
 
         <Stack.Item>
-          <Stack horizontal horizontalAlign="center" verticalAlign="center">
+          <Stack
+            horizontal
+            horizontalAlign="center"
+            verticalAlign="center"
+            style={{
+              border: '5px solid blue',
+              borderRadius: '2%',
+              backgroundColor: 'lightblue'
+            }}
+          >
             <Image
-              src="/static/logo.png"
+              src="/static/organized.png"
               imageFit={ImageFit.contain}
-              width={150}
-              height={150}
+              width={125}
+              height={125}
             />
             <h3>
               Does having multiple accounts with calendars ever make it
@@ -106,53 +139,101 @@ export default function Login() {
             </h3>
           </Stack>
         </Stack.Item>
+
         <Stack.Item>
-          <Stack horizontal horizontalAlign="center" verticalAlign="center">
-            <Image
+          <Stack
+            horizontal
+            horizontalAlign="center"
+            verticalAlign="center"
+            style={{}}
+          >
+            {/* <Image
               src="/static/logo.png"
               imageFit={ImageFit.contain}
               width={150}
               height={150}
-            />
-            <h1>Calglomerate is here to help!</h1>
+            /> */}
+            <h1
+              style={{
+                color: 'blue',
+                // border: '5px solid blue',
+                // borderRadius: '2%',
+                // backgroundColor: 'lightblue',
+                // padding: '20px',
+                fontSize: '4em',
+                textShadow: '0 0 3px #FFFFFF, 0 0 5px #0000FF'
+              }}
+            >
+              Calglomerate is here to help!
+            </h1>
           </Stack>
         </Stack.Item>
-      </Stack>
-      <Stack
-        horizontal
-        horizontalAlign="center"
-        verticalAlign="center"
-        tokens={{ childrenGap: 10, padding: 20 }}
-      >
-        <h1>Get started now!</h1>
-        <GoogleLogin
-          clientId="658056760445-ejq8q635n1948vqieqf95vsa6c6e1fvp.apps.googleusercontent.com"
-          scope="https://www.googleapis.com/auth/calendar.readonly"
-          buttonText="Register"
-          onSuccess={loginUser}
-          onFailure={loginUserFail}
-          accessType="offline"
-          responseType="code"
-          cookiePolicy="single_host_origin"
-        />
-      </Stack>
-      <Stack
-        horizontal
-        horizontalAlign="center"
-        verticalAlign="center"
-        tokens={{ childrenGap: 10 }}
-      >
-        <h3>Have an Account? Login Here:</h3>
-        <GoogleLogin
-          clientId="658056760445-ejq8q635n1948vqieqf95vsa6c6e1fvp.apps.googleusercontent.com"
-          scope="https://www.googleapis.com/auth/calendar.readonly"
-          buttonText="Login"
-          onSuccess={loginUser}
-          onFailure={loginUserFail}
-          accessType="offline"
-          responseType="code"
-          cookiePolicy="single_host_origin"
-        />
+
+        <Stack
+          horizontal
+          horizontalAlign="center"
+          verticalAlign="center"
+          tokens={{ childrenGap: 10 }}
+        >
+          <Stack
+            horizontal
+            horizontalAlign="center"
+            verticalAlign="center"
+            tokens={{ childrenGap: 10, padding: 20 }}
+            style={{
+              border: '5px solid blue',
+              borderRadius: '2%',
+              backgroundColor: 'lightblue'
+            }}
+          >
+            <h1>Have an account? Login here:</h1>
+            <div>
+              <GoogleLogin
+                clientId="658056760445-ejq8q635n1948vqieqf95vsa6c6e1fvp.apps.googleusercontent.com"
+                scope="https://www.googleapis.com/auth/calendar.readonly"
+                buttonText="Login"
+                onSuccess={loginUser}
+                onFailure={loginUserFail}
+                accessType="offline"
+                responseType="code"
+                cookiePolicy="single_host_origin"
+              />
+            </div>
+          </Stack>
+        </Stack>
+
+        <Stack
+          horizontal
+          horizontalAlign="center"
+          verticalAlign="center"
+          tokens={{ childrenGap: 10, padding: 20 }}
+        >
+          <Stack
+            horizontal
+            horizontalAlign="center"
+            verticalAlign="center"
+            tokens={{ childrenGap: 10, padding: 20 }}
+            style={{
+              border: '5px solid blue',
+              borderRadius: '2%',
+              backgroundColor: 'lightblue'
+            }}
+          >
+            <h1>Get started now!</h1>
+            <div>
+              <GoogleLogin
+                clientId="658056760445-ejq8q635n1948vqieqf95vsa6c6e1fvp.apps.googleusercontent.com"
+                scope="https://www.googleapis.com/auth/calendar.readonly"
+                buttonText="Register"
+                onSuccess={loginUser}
+                onFailure={loginUserFail}
+                accessType="offline"
+                responseType="code"
+                cookiePolicy="single_host_origin"
+              />
+            </div>
+          </Stack>
+        </Stack>
       </Stack>
     </Stack>
   );
