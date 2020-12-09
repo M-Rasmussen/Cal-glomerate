@@ -323,17 +323,6 @@ class SQLQueryTestCase(unittest.TestCase):
                         response = app.on_new_event(test_case[KEY_INPUT])
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
-    def test_socket_on_modify_calendar(self):
-        """
-        Success cases for push_new_user_to_db.
-        """
-        for test_case in self.success_test_params_on_mod_cal:
-            with mock.patch("app.db", AlchemyMagicMock()):
-                with mock.patch("app.socketio.emit", self.mock_emit):
-                    
-                    response = app.on_modify_calendar(test_case[KEY_INPUT])
-            expected = test_case[KEY_EXPECTED]
-            self.assertEqual(response, expected)
 
     def test_on_merge_calendar(self):
         """
@@ -455,17 +444,6 @@ class SQLQueryTestCase(unittest.TestCase):
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
 
-    def test_socket_on_import_cal(self):
-        """
-        Success cases for push_new_user_to_db.
-        """
-        for test_case in self.success_test_params_on_import:
-            with mock.patch("app.db", AlchemyMagicMock()):
-                with mock.patch("app.socketio.emit", self.mock_emit):
-
-                    response = app.on_import_calendar(test_case[KEY_INPUT])
-            expected = test_case[KEY_EXPECTED]
-            self.assertEqual(response, expected)
 
 class GoogleLoginTestCase(unittest.TestCase):
     """
