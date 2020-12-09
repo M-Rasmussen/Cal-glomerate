@@ -17,6 +17,5 @@ module.exports = {
     quotes: ['error', 'double'],
     'linebreak-style': ['error', 'unix'],
     'react/prop-types': [0],
-    'prettier/prettier': ['error']
   }
 };

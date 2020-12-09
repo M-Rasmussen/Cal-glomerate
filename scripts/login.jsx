@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
 import { GoogleLogin } from 'react-google-login';
-import { Socket } from './Socket';
-import './loginstyle.css';
-import { Cal_comp } from './CalenderComp.jsx';
-import { HomePage } from './LogedInHome';
 import {
   ContextualMenu,
   DefaultButton,
-  IconButton,
   Image,
   ImageFit,
   Modal,
-  Stack
+  Stack,
 } from 'office-ui-fabric-react';
+import { HomePage } from './LogedInHome';
+import { Socket } from './Socket';
+import './loginstyle.css';
 
 export default function Login() {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
   const [ccode, setCcode] = useState([-1]);
   const [userId, setUserId] = useState('');
   const [token, setToken] = useState('');
@@ -25,7 +21,7 @@ export default function Login() {
 
   function loginUser(response) {
     Socket.emit('new google user', {
-      code: response['code']
+      code: response.code,
     });
   }
 
@@ -37,7 +33,6 @@ export default function Login() {
     React.useEffect(() => {
       Socket.on('Verified', (data) => {
         setLoggedIn(true);
-        setUsername(data.name);
         setCcode(data.ccodes);
         setUserId(data.userid);
         setToken(data.access_token);
@@ -47,7 +42,7 @@ export default function Login() {
 
   verifiedSession();
 
-  if (loggedIn && ccode[0] != -1) {
+  if (loggedIn && ccode[0] !== -1) {
     return (
       <div
         className="outermost"
@@ -69,7 +64,7 @@ export default function Login() {
             Calglomerate
           </h1>
         </Stack>
-        <div className="header"></div>
+        <div className="header" />
         <div className="container">
           <HomePage ccode={ccode} userId={userId} access_token={token} />
         </div>
@@ -100,7 +95,7 @@ export default function Login() {
         </h1>
       </Stack>
 
-      <div className="header" style={{ width: '100vw' }}></div>
+      <div className="header" style={{ width: '100vw' }} />
       <Stack tokens={{ childrenGap: 10, padding: 20 }}>
         <Stack.Item>
           <Stack
@@ -110,7 +105,7 @@ export default function Login() {
             style={{
               border: '5px solid blue',
               borderRadius: '2%',
-              backgroundColor: 'lightblue'
+              backgroundColor: 'lightblue',
             }}
           >
             <h2>
@@ -133,7 +128,7 @@ export default function Login() {
             style={{
               border: '5px solid blue',
               borderRadius: '2%',
-              backgroundColor: 'lightblue'
+              backgroundColor: 'lightblue',
             }}
           >
             <Image
@@ -170,7 +165,7 @@ export default function Login() {
                 // backgroundColor: 'lightblue',
                 // padding: '20px',
                 fontSize: '4em',
-                textShadow: '0 0 3px #FFFFFF, 0 0 5px #0000FF'
+                textShadow: '0 0 3px #FFFFFF, 0 0 5px #0000FF',
               }}
             >
               Calglomerate is here to help!
@@ -192,7 +187,7 @@ export default function Login() {
             style={{
               border: '5px solid blue',
               borderRadius: '2%',
-              backgroundColor: 'lightblue'
+              backgroundColor: 'lightblue',
             }}
           >
             <h1>Have an account? Login here:</h1>
@@ -225,7 +220,7 @@ export default function Login() {
             style={{
               border: '5px solid blue',
               borderRadius: '2%',
-              backgroundColor: 'lightblue'
+              backgroundColor: 'lightblue',
             }}
           >
             <h1>Get started now!</h1>
@@ -248,7 +243,7 @@ export default function Login() {
             style={{
               border: '5px solid blue',
               borderRadius: '2%',
-              backgroundColor: 'lightblue'
+              backgroundColor: 'lightblue',
             }}
             iconProps={{ iconName: 'Info' }}
             title="Settings"
@@ -261,7 +256,7 @@ export default function Login() {
           </DefaultButton>
         </Stack>
         <Modal
-          titleAriaId={'About Calglomerate'}
+          titleAriaId="About Calglomerate"
           isOpen={modal}
           onDismiss={() => {
             setModal(false);
@@ -270,7 +265,7 @@ export default function Login() {
           dragOptions={{
             moveMenuItemText: 'Move',
             closeMenuItemText: 'Close',
-            menu: ContextualMenu
+            menu: ContextualMenu,
           }}
         >
           <div style={{ padding: '10px' }}>
@@ -310,7 +305,7 @@ export default function Login() {
                   backend together.
                 </li>
               </ul>
-              <li>Why we've made it?</li>
+              <li>Why we&apos;ve made it?</li>
               <ul>
                 <li>
                   Many people have multiple Calendars and Have you ever had an
