@@ -122,6 +122,8 @@ export default function Login() {
           buttonText="Register"
           onSuccess={loginUser}
           onFailure={loginUserFail}
+          accessType="offline"
+          responseType="code"
           cookiePolicy="single_host_origin"
         />
       </Stack>
