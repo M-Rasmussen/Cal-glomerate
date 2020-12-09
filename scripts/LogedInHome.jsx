@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Cal_comp } from './CalenderComp';
+import { CalComp } from './CalenderComp';
 import { Create_event } from './Add_Event';
 import { MergeCalenders } from './MergeCalComp';
 import { Create_cal } from './Add_Cal';
@@ -81,7 +81,7 @@ export function HomePage({ ccode, userId, access_token }) {
       </div>
       <div className="calender_side">
         <Card style={{ maxWidth: 'none', padding: '5px', background: 'white' }}>
-          <Cal_comp ccode={ccode} eventsToShow={eventsToShow} />
+          <CalComp ccode={ccode} eventsToShow={eventsToShow} />
         </Card>
       </div>
     </div>

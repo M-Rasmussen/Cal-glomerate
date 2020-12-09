@@ -18,5 +18,8 @@ module.exports = {
     'react',
   ],
   rules: {
+    'react/prop-types': [0],
+    'import/prefer-default-export':[0],
+    'no-prototype-builtins':[0]
   },
 };

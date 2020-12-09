@@ -1,25 +1,21 @@
 import React, { useState } from 'react';
-import { Calendar, Views, momentLocalizer } from 'react-big-calendar';
-import * as dates from './dates';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
-import './CalenderStyle.css';
-import { Socket } from './Socket';
-
 import randomColor from 'randomcolor';
 import TimePicker from 'react-time-picker';
-
 import {
   ContextualMenu,
   DatePicker,
   DefaultButton,
   Modal,
   Stack,
-  TextField
+  TextField,
 } from 'office-ui-fabric-react';
+import { Socket } from './Socket';
+import * as dates from './dates';
+import './CalenderStyle.css';
 
-export function Cal_comp({ ccode, eventsToShow }) {
-  console.log('skjdnf');
-  console.log(eventsToShow);
+export function CalComp({ ccode, eventsToShow }) {
   const localizer = momentLocalizer(moment);
   const [modal, setModal] = React.useState(false);
   const [modstartTime, modsetStartTime] = React.useState('11:00');
@@ -32,10 +28,10 @@ export function Cal_comp({ ccode, eventsToShow }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     const start = moment(
-      modselectedDate.toISOString().split('T')[0] + ' ' + modstartTime
+      `${modselectedDate.toISOString().split('T')[0]} ${modstartTime}`,
     ).format('X');
     const end = moment(
-      modselectedDate.toISOString().split('T')[0] + ' ' + modendTime
+      `${modselectedDate.toISOString().split('T')[0]} ${modendTime}`,
     ).format('X');
     Socket.emit('modify event', {
       title: modtitle,
@@ -44,21 +40,21 @@ export function Cal_comp({ ccode, eventsToShow }) {
       end,
       ccode: modEventCCode,
       event_id: modEventId,
-      ccode_list: ccode
+      ccode_list: ccode,
     });
     setModal(false);
   };
   function modEventTime(event) {
-    let unformattedStart = new Date(event.start).toLocaleTimeString('en-US', {
-      hour12: false
+    const unformattedStart = new Date(event.start).toLocaleTimeString('en-US', {
+      hour12: false,
     });
-    let formattedStart = unformattedStart.slice(0, 5);
+    const formattedStart = unformattedStart.slice(0, 5);
     modsetStartTime(formattedStart);
 
-    let unformattedEnd = new Date(event.end).toLocaleTimeString('en-US', {
-      hour12: false
+    const unformattedEnd = new Date(event.end).toLocaleTimeString('en-US', {
+      hour12: false,
     });
-    let formattedEnd = unformattedEnd.slice(0, 5);
+    const formattedEnd = unformattedEnd.slice(0, 5);
     modsetEndTime(formattedEnd);
   }
   const handleDelete = (event) => {
@@ -67,7 +63,7 @@ export function Cal_comp({ ccode, eventsToShow }) {
     Socket.emit('delete event', {
       ccode: modEventCCode,
       event_id: modEventId,
-      ccode_list: ccode
+      ccode_list: ccode,
     });
     setModal(false);
   };
@@ -78,7 +74,6 @@ export function Cal_comp({ ccode, eventsToShow }) {
         localizer={localizer}
         events={eventsToShow}
         step={60}
-        defaultView={Views.MONTHS}
         max={dates.add(dates.endOf(new Date(2015, 17, 1), 'day'), -1, 'hours')}
         scrollToTime={new Date(1970, 1, 1, 6)}
         defaultDate={new Date(2020, 10, 1)}
@@ -90,21 +85,21 @@ export function Cal_comp({ ccode, eventsToShow }) {
           modSetEventId(event.event_id);
           modSetEventCCode(event.ccode[0]);
         }}
-        eventPropGetter={(event, start, end, isSelected) => {
+        eventPropGetter={(event) => {
           const backgroundColor = randomColor({ seed: event.ccode[0] * 1000 });
           const style = {
-            backgroundColor: backgroundColor,
+            backgroundColor,
             // borderRadius: '0px',
             opacity: 0.8,
             color: 'black',
             border: '0px',
-            display: 'block'
+            display: 'block',
           };
           return { style };
         }}
       />
       <Modal
-        titleAriaId={'View Event'}
+        titleAriaId="View Event"
         isOpen={modal}
         onDismiss={() => {
           setModal(false);
@@ -114,7 +109,7 @@ export function Cal_comp({ ccode, eventsToShow }) {
         dragOptions={{
           moveMenuItemText: 'Move',
           closeMenuItemText: 'Close',
-          menu: ContextualMenu
+          menu: ContextualMenu,
         }}
       >
         {' '}
