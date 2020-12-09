@@ -5,7 +5,15 @@ import { Socket } from './Socket';
 import './loginstyle.css';
 import { Cal_comp } from './CalenderComp.jsx';
 import { HomePage } from './LogedInHome';
-import { Image, ImageFit, Stack } from 'office-ui-fabric-react';
+import {
+  ContextualMenu,
+  DefaultButton,
+  IconButton,
+  Image,
+  ImageFit,
+  Modal,
+  Stack
+} from 'office-ui-fabric-react';
 
 export default function Login() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -13,6 +21,7 @@ export default function Login() {
   const [ccode, setCcode] = useState([-1]);
   const [userId, setUserId] = useState('');
   const [token, setToken] = useState('');
+  const [modal, setModal] = useState(false);
 
   function loginUser(response) {
     Socket.emit('new google user', {
@@ -234,6 +243,96 @@ export default function Login() {
             </div>
           </Stack>
         </Stack>
+        <Stack horizontal horizontalAlign="center" verticalAlign="center">
+          <DefaultButton
+            style={{
+              border: '5px solid blue',
+              borderRadius: '2%',
+              backgroundColor: 'lightblue'
+            }}
+            iconProps={{ iconName: 'Info' }}
+            title="Settings"
+            ariaLabel="Settings"
+            onClick={() => {
+              setModal(true);
+            }}
+          >
+            About Calglomerate
+          </DefaultButton>
+        </Stack>
+        <Modal
+          titleAriaId={'About Calglomerate'}
+          isOpen={modal}
+          onDismiss={() => {
+            setModal(false);
+          }}
+          isBlocking={false}
+          dragOptions={{
+            moveMenuItemText: 'Move',
+            closeMenuItemText: 'Close',
+            menu: ContextualMenu
+          }}
+        >
+          <div style={{ padding: '10px' }}>
+            <h2>About Calglomerate</h2>
+            <ul>
+              <li>Who are We?</li>
+              <ul>
+                <li>
+                  We’re a team of four Computer Science college students from
+                  NJIT - Samuel Carlos, David Balcon, Mathew Rasmussen, and
+                  Harsh Patel - who sought to solve an issue with time. For many
+                  of us, time is a scarce resource and time after time we’re
+                  told to take advantage of it, yet, for many of us organizing
+                  it is a tall task, and even more so when you add your friends
+                  into the picture.
+                </li>
+              </ul>
+              <li>What is Calglomerate?</li>
+              <ul>
+                <li>
+                  Therefore, we’ve made Calglomerate - an application to make
+                  meeting management easier. With Calglomerate, you can easily
+                  create events. Managing multiple calendars is also a breeze
+                  with our calendar merging algorithms - So you can keep your
+                  work calendar separate from your personal calendar while
+                  remaining organized. Best of all, it’s as simple as a click to
+                  share them with your friends! Just input a code they send you
+                  and boom - you’re instantly subscribed to them.
+                </li>
+              </ul>
+              <li>How does it work?</li>
+              <ul>
+                <li>
+                  For the backend, we used python, flask, sqlalchemy for the
+                  database. For the frontend, we used React, OAuth Api, google
+                  calendar Api. SocketIO was used to link the frontend and
+                  backend together.
+                </li>
+              </ul>
+              <li>Why we've made it?</li>
+              <ul>
+                <li>
+                  Many people have multiple Calendars and Have you ever had an
+                  issue with trying to plan out your events with others? Trying
+                  to figure out when you are free or if you have conflicting
+                  events on your multiple calendars, Calglomerate is there for
+                  you. We give users the ability to merge their calendars with
+                  others.
+                </li>
+              </ul>
+              <li>Where can you see Calglomerate?</li>
+              <ul>
+                <li>
+                  <a href="http://calglomerate.herokuapp.com/ ">
+                    calglomerate.herokuapp.com/
+                  </a>
+                  - You’re already here!
+                </li>
+              </ul>
+            </ul>
+          </div>
+        </Modal>
       </Stack>
     </Stack>
   );
