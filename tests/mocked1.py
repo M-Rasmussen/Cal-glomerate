@@ -16,9 +16,9 @@ import unittest.mock as mock
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join("..")))
-import app
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import models
+import app
 from alchemy_mock.mocking import AlchemyMagicMock
 
 KEY_INPUT = "arg1"
@@ -236,16 +236,14 @@ class SQLQueryTestCase(unittest.TestCase):
         sid = "fake sid"
         print("returning: " + sid)
         return sid
-
+    
     def mocked_exists(self, userid):
         """"Mocked out to make sure the user exists in the database"""
         return False
     
     def mocked_emit_events_to_calender(self, channel,cal_code):
-        """
-        Mocks out emit events to calender
-        """
         return True
+
 
     def test_push_new_user_to_db(self):
         """
@@ -296,6 +294,24 @@ class SQLQueryTestCase(unittest.TestCase):
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
 
+
+    def test_send_events_to_calendar(self):
+        """
+        send_events_to_calendar
+        """
+        for test_case in self.success_test_params_send_events_to_cal:
+            with mock.patch("app.db", AlchemyMagicMock()):
+                with mock.patch("app.socketio.emit", self.mock_emit):
+                    with mock.patch("app.get_sid", self.mock_sid):
+                        with mock.patch("app.emit_events_to_calender",self.mocked_emit_events_to_calender):
+                            response = app.send_events_to_calendar(
+                                test_case[KEY_INPUT]
+                            )
+            expected = test_case[KEY_EXPECTED]
+            self.assertEqual(response, expected)
+
+
+
     def test_socket_on_new_event(self):
         """
         Success cases for push_new_user_to_db.
@@ -331,19 +347,7 @@ class SQLQueryTestCase(unittest.TestCase):
                             response = app.on_merge_calendar(test_case[KEY_INPUT])
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
-    # sucess_test_params_hello
-    # def test_on_merge_calendar(self):
-    #     """
-    #     Success cases for push_new_user_to_db.
-    #     """
-    #     for test_case in self.success_test_params_on_new_merge:
-    #         with mock.patch("app.db", AlchemyMagicMock()):
-    #             with mock.patch("app.socketio.emit", self.mock_emit):
-    #                 with mock.patch("app.get_sid", self.mock_sid):
-    #                     with mock.patch("app.exists_in_calender", self.mocked_exists):
-    #                         response = app.on_merge_calendar(test_case[KEY_INPUT])
-            # expected = test_case[KEY_EXPECTED]
-            # self.assertEqual(response, expected)
+            
     def test_exists_in_calender(self):
         for test_case in self.sucess_test_params_check_id:
             with mock.patch("app.db", AlchemyMagicMock()):
@@ -384,14 +388,7 @@ class SQLQueryTestCase(unittest.TestCase):
                             test_case[KEY_INPUT])
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
-    def test_send_events_to_calendar(self):
-        for test_case in self.success_test_params_send_events_to_cal:
-            with mock.patch("app.db", AlchemyMagicMock()):
-                with mock.patch("app.emit_events_to_calender", self.mock_emit):
-                    response = app.send_events_to_calendar(
-                        test_case[KEY_INPUT])
-            expected= test_case[KEY_EXPECTED]
-            self.assertEqual(response,expected)
+    
     
     def test_send_ccode_to_calendar(self):
         for test_case in self.success_test_params_send_events_to_cal:
@@ -514,9 +511,11 @@ class GoogleLoginTestCase(unittest.TestCase):
                 },
                 KEY_EXPECTED:True,
             },]
-
     
-
+    def mocked_exists(self, userid):
+        """"Mocked out to make sure the user exists in the database"""
+        return False
+        
     def mocked_verify(self, *args, **kwargs):
         """
         Creates a mocked Google verification.
@@ -547,8 +546,6 @@ class GoogleLoginTestCase(unittest.TestCase):
                 return self.sig_id
 
         return MockedFlaskServer("1234").sid()
-    def mocked_exists(self,check):
-        return "exists"
     def test_on_new_google_user_success(self):
         """
         Success cases for on_new_google_user.
@@ -578,9 +575,7 @@ class GoogleLoginTestCase(unittest.TestCase):
             expected = test_case[KEY_EXPECTED]
             self.assertEqual(response, expected)
     def test_exists_in_auth_user(self):
-        """
-        Test exists in auth user
-        """
+
         for test_case in self.sucess_test_params_check_id:
             with mock.patch("app.db", AlchemyMagicMock()):
                 response = app.exists_in_auth_user(
